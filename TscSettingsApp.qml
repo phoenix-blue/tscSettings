@@ -1,5 +1,6 @@
 import QtQuick 1.1
 import BxtClient 1.0
+import FileIO 1.0
 
 import qb.components 1.0
 import qb.base 1.0
@@ -11,6 +12,12 @@ App {
 	property url rotateTilesScreenUrl: "RotateTilesScreen.qml"
 	property url hideToonLogoScreenUrl: "HideToonLogoScreen.qml"
 	property url customToonLogoScreenUrl: "CustomToonLogoScreen.qml"
+
+	property string tscVersion: "1.2"
+	
+	FileIO { 
+		id: startupFileIO
+	}
 
 	function init() {
 		registry.registerWidget("settingsFrame", tscFrameUrl, this, "tscFrame", {categoryName: "TSC", categoryWeight: 310});
@@ -52,9 +59,21 @@ App {
 	}
 
 	function createStartupFile() {
-                var startupFile = new XMLHttpRequest();
-                startupFile.open("PUT", "file:///etc/rc5.d/S99tsc.sh");
-		startupFile.send("if [ ! -s /usr/bin/tsc ] ; then wget -q http://ergens.org/toon/tsc -O /usr/bin/tsc ; chmod +x /usr/bin/tsc ; fi ; if ! grep -q tscs /etc/inittab ; then sed -i '/qtqt/a\ tscs:245:respawn:/usr/bin/tsc >/var/log/tsc 2>&1' /etc/inittab ; if grep tscs /etc/inittab ; then reboot ; fi ; fi");
-		startulFile.close;
+		// create a startup file which downloads the TSC control script and installs a inittab routine
+  		var startupFileCheck = new XMLHttpRequest();
+		console.log("TSC: checking tsc boot file"); 
+                startupFileCheck.onreadystatechange = function() {
+                        if (startupFileCheck.readyState == XMLHttpRequest.DONE) {
+                                if (startupFileCheck.responseText.length === 0)  {
+					console.log("TSC: missing tsc boot startup file, creating it")
+	        			var startupFile = new XMLHttpRequest();
+					startupFile.open("PUT", "file:///etc/rc5.d/S99tsc.sh");
+					startupFile.send("if [ ! -s /usr/bin/tsc ] ; then wget -q --no-check-certificate https://raw.githubusercontent.com/IgorYbema/tscSettings/master/tsc -O /usr/bin/tsc ; chmod +x /usr/bin/tsc ; fi ; if ! grep -q tscs /etc/inittab ; then sed -i '/qtqt/a\ tscs:245:respawn:/usr/bin/tsc >/var/log/tsc 2>&1' /etc/inittab ; if grep tscs /etc/inittab ; then reboot ; fi ; fi");
+					startupFile.close;
+				}
+			}
+		}
+                startupFileCheck.open("GET", "file:///etc/rc5.d/S99tsc.sh", true);
+                startupFileCheck.send();
 	}
 }

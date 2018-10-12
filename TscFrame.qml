@@ -27,18 +27,18 @@ Widget {
 		}
 	}
 
-        function updateCustomToonLogo() {
-                switch(globals.tsc["customToonLogo"]) {
-                        case 0: customToonLogoLabel.rightText = "Disabled"; break;
-                        case 1: customToonLogoLabel.rightText = "Enabled"; break;
-                        default: customToonLogoLabel.rightText = "unknown"; break;
-                }
-        }
+	function updateCustomToonLogo() {
+		switch(globals.tsc["customToonLogo"]) {
+			case 0: customToonLogoLabel.rightText = "Disabled"; break;
+			case 1: customToonLogoLabel.rightText = "Enabled"; break;
+			default: customToonLogoLabel.rightText = "unknown"; break;
+		}
+	}
 
 	onShown: {
 		updateRotateTiles();
 		updateHideToonLogo();
-                updateCustomToonLogo();
+		updateCustomToonLogo();
 	}
 
 	anchors.fill: parent
@@ -118,38 +118,38 @@ Widget {
 			}
 		}
 
-                SingleLabel {
-                        id: customToonLogoLabel
-                        anchors {
-                                top: hideToonLogoButton.bottom
-                                topMargin: Math.round(30 * 1.25)
-                                left: parent.left
-                                right: hideToonLogoButton.left
-                                rightMargin: 8
-                        }
-                        leftText: qsTr("Custom Toon logo")
-                        rightText: ""
+		SingleLabel {
+			id: customToonLogoLabel
+			anchors {
+				top: hideToonLogoButton.bottom
+				topMargin: Math.round(30 * 1.25)
+				left: parent.left
+				right: hideToonLogoButton.left
+				rightMargin: 8
+			}
+			leftText: qsTr("Custom Toon logo")
+			rightText: ""
 
-                }
+		}
 
-                IconButton {
-                        id: customToonLogoButton
+		IconButton {
+			id: customToonLogoButton
 
-                        width: 45
-                        height: customToonLogoLabel.height
+			width: 45
+			height: customToonLogoLabel.height
 
-                        iconSource: "qrc:/images/edit.svg"
+			iconSource: "qrc:/images/edit.svg"
 
-                        anchors {
-                                top: customToonLogoLabel.top
-                                right: parent.right
-                        }
+			anchors {
+				top: customToonLogoLabel.top
+				right: parent.right
+			}
 
-                        topClickMargin: 3
-                        onClicked: {
-                                stage.openFullscreen(app.customToonLogoScreenUrl);
-                        }
-                }
+			topClickMargin: 3
+			onClicked: {
+				stage.openFullscreen(app.customToonLogoScreenUrl);
+			}
+		}
 
 
 		StandardButton {
@@ -172,5 +172,41 @@ Widget {
 		}
 
 
+		StandardButton {
+			id: checkUpdateButton
+
+			text: qsTr("Check TSC update")
+
+			height: 40 
+
+			anchors {
+				left: parent.left
+				top: restartGuiButton.bottom
+				topMargin: Math.round(30 * 1.25)
+			}
+
+			topClickMargin: 2
+			onClicked: {
+				var commandFile = new XMLHttpRequest();
+				commandFile.open("PUT", "file:///tmp/tsc.command");
+				commandFile.send("tscupdate");
+				commandFile.close
+			}
+		}
+
 	}
+	Text {
+       	         id: versionText
+       	         text: "Versie: " + app.tscVersion
+       	         anchors {
+       	                 baseline: parent.bottom
+       	                 baselineOffset: -5
+       	                 horizontalCenter: parent.horizontalCenter
+       	         }
+       	         font {
+       	                 pixelSize: isNxt ? 18 : 15
+       	                 family: qfont.italic.name
+       	         }
+       	         color: colors.taTrafficSource
+       	 }
 }
