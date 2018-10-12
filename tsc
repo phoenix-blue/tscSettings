@@ -3,59 +3,102 @@
 # load a sane environment
 . /etc/profile
 
+ROUNDWAIT=5
+UPDATECHECKINTERVAL=86400
+STARTTIME=`date +%s`
+LASTUPDATECHECK=0
+COMMANDFILE=/tmp/tsc.command
+
+
+checkSelfUpdate() {
+	MD5TSCONLINE=`curl -Nks https://raw.githubusercontent.com/IgorYbema/tscSettings/master/tsc.md5 | cut -d\  -f1`
+	MD5TSCNOW=`/usr/bin/md5sum /usr/bin/tsc | cut -d\  -f1`
+	if [ !  "$MD5TSCNOW" == "$MD5TSCONLINE" ] && [ -n "$MD5TSCONLINE" ]
+	then
+		echo "There is a new version of the TSC script available. Updating and restarting!"
+		/usr/bin/wget -q https://raw.githubusercontent.com/IgorYbema/tscSettings/master/tsc -O /usr/bin/tsc.new -T 5 -t 2
+		MD5TSCNOW=`/usr/bin/md5sum /usr/bin/tsc.new | cut -d\  -f1`
+		if [ "$MD5TSCNOW" == "$MD5TSCONLINE" ]
+		then
+			echo "Download ok! Replacing myself and restarting."
+			mv /usr/bin/tsc.new /usr/bin/tsc
+			chmod +x /usr/bin/tsc
+			/qmf/bin/bxt -d :happ_usermsg -s Notification -n CreateNotification -a type -v update -a subType -v tsc -a text -v "Er is een nieuwe TSC support script gedownload. Script is gerestart." >/dev/null 2>&1
+			sleep 5
+			killall -9 tsc
+			exit
+		else
+			echo "Download failed. Trying next time."
+		fi
+	fi
+}
+
 checkResourceFiles() {
 	UPDATEAVAILABLE=false
-	VERSIONSAVAILABLE=`curl -Nks https://raw.githubusercontent.com/IgorYbema/tscSettings/master/resource.file.versions`
- 	MD5NEW=`echo "$VERSIONSAVAILABLE" | grep $ARCH | grep $VERSION | grep base | cut -d\, -f4`
-        MD5NOW=`/usr/bin/md5sum /qmf/qml/resources-static-base.rcc | cut -d\  -f1`
-        if [ !  "$MD5NOW" == "$MD5NEW" ]
-        then
-                echo "Base resource file update available!"
+	VERSIONSAVAILABLE=`curl -Nks http://qutility.nl/resourcefiles/resource.file.versions`
+	MD5NEW=`echo "$VERSIONSAVAILABLE" | grep $ARCH | grep $VERSION | grep base | cut -d\, -f4`
+	MD5NOW=`/usr/bin/md5sum /qmf/qml/resources-static-base.rcc | cut -d\  -f1`
+	if [ !  "$MD5NOW" == "$MD5NEW" ]
+	then
+		echo "Base resource file update available!"
 		UPDATEAVAILABLE=true
 	fi
 
- 	MD5NEW=`echo "$VERSIONSAVAILABLE" | grep $ARCH | grep $VERSION | grep ebl | cut -d\, -f4`
-        MD5NOW=`/usr/bin/md5sum /qmf/qml/resources-static-ebl.rcc | cut -d\  -f1`
-        if [ !  "$MD5NOW" == "$MD5NEW" ]
-        then
-                echo "EBL resource file update available!"
+	MD5NEW=`echo "$VERSIONSAVAILABLE" | grep $ARCH | grep $VERSION | grep ebl | cut -d\, -f4`
+	MD5NOW=`/usr/bin/md5sum /qmf/qml/resources-static-ebl.rcc | cut -d\  -f1`
+	if [ !  "$MD5NOW" == "$MD5NEW" ]
+	then
+		echo "EBL resource file update available!"
 		UPDATEAVAILABLE=true
-        fi
+	fi
 }
 
 updateResourceFiles() {
 	echo "Updating resource files!"
 
-        RESOURCEFILEURL="http://files.domoticaforum.eu/uploads/Toon/resourcefiles/resources-$ARCH-$VERSION.zip"
-        /usr/bin/wget  $RESOURCEFILEURL -O /tmp/resources-$ARCH-$VERSION.zip -T 5 -t 2 -o /dev/null
-        RESULT=$?
+	RESOURCEFILEURL="http://qutility.nl/resourcefiles/resources-$ARCH-$VERSION.zip"
+	/usr/bin/wget  $RESOURCEFILEURL -O /tmp/resources-$ARCH-$VERSION.zip -T 5 -t 2 -o /dev/null
+	RESULT=$?
 
-        if [ ! $RESULT == 0 ]
-        then
-                echo "Could not download a resources.rcc file for this version! Continuing, but your custom apps probably dont work anymore"
-        else
-                mv /qmf/qml/resources-static-base.rcc /qmf/qml/resources-static-base.rcc.backup
-                mv /qmf/qml/resources-static-ebl.rcc /qmf/qml/resources-static-ebl.rcc.backup
-                /usr/bin/unzip -oq /tmp/resources-$ARCH-$VERSION.zip -d /qmf/qml
-        fi
+	if [ ! $RESULT == 0 ]
+	then
+		echo "Could not download a resources.rcc file for this version! Continuing, but your custom apps probably dont work anymore"
+	else
+		mv /qmf/qml/resources-static-base.rcc /qmf/qml/resources-static-base.rcc.backup
+		mv /qmf/qml/resources-static-ebl.rcc /qmf/qml/resources-static-ebl.rcc.backup
+		/usr/bin/unzip -oq /tmp/resources-$ARCH-$VERSION.zip -d /qmf/qml
+	fi
 }
 
 getVersion() {
-        #determine current architecture
-        if grep -q nxt /etc/opkg/arch.conf
-        then
-                ARCH="nxt"
-        else
-                ARCH="qb2"
-        fi
-        VERSION=`opkg list-installed base-$ARCH-\* | sed -r -e "s/base-$ARCH-([a-z]{3})\s-\s([0-9]*\.[0-9]*\.[0-9]*)-.*/\2/"`
+	#determine current architecture
+	if grep -q nxt /etc/opkg/arch.conf
+	then
+		ARCH="nxt"
+	else
+		ARCH="qb2"
+	fi
+	VERSION=`opkg list-installed base-$ARCH-\* | sed -r -e "s/base-$ARCH-([a-z]{3})\s-\s([0-9]*\.[0-9]*\.[0-9]*)-.*/\2/"`
 	echo "Running $VERSION on a $ARCH"
 }
 
-ROUNDWAIT=10
-UPDATECHECKINTERVAL=86400
-STARTTIME=`date +%s`
-LASTUPDATECHECK=0
+checkUpdate() {
+	checkSelfUpdate
+	getVersion
+	checkResourceFiles
+	if [ "$UPDATEAVAILABLE" = true ] 
+	then
+		updateResourceFiles
+		/qmf/bin/bxt -d :happ_usermsg -s Notification -n CreateNotification -a type -v update -a subType -v tsc -a text -v "Er is een TSC resource file update gedownload. Restart GUI aub" >/dev/null 2>&1
+	fi
+}
+
+flushFirewall() {
+	echo "Flushing firewall rules"
+	iptables -F
+	/qmf/bin/bxt -d :happ_usermsg -s Notification -n CreateNotification -a type -v firewall -a subType -v tsc -a text -v "Firewall regels verwijderd" >/dev/null 2>&1
+}
+
 
 echo "Starting TSC support script"
 while true
@@ -65,19 +108,33 @@ do
 	then
 		echo "Checking for updates"
 		LASTUPDATECHECK=$STARTROUNDTIME
-		getVersion
-		checkResourceFiles
-		if [ "$UPDATEAVAILABLE" = true ] 
-		then
-			updateResourceFiles
-		fi
+		checkUpdate
 	fi
-	
+
+	if [ -s $COMMANDFILE ]
+	then
+		while IFS='' read -r line || [[ -n "$line" ]]; do
+			echo "Command received: $line"
+			case $line in
+				flushfirewall)
+					flushFirewall
+					;;
+				tscupdate)
+					LASTUPDATECHECK=$STARTROUNDTIME
+					checkUpdate
+					;;
+				*) 	
+					echo "Command not available: $line"
+					;;	
+			esac
+		done < "$COMMANDFILE"
+		rm -f $COMMANDFILE
+	fi
+
 	WAITTIME=$(( $STARTROUNDTIME + $ROUNDWAIT - `date +%s` )) 
 	if  [[ $WAITTIME -gt 0  ]]
 	then
 		sleep $WAITTIME
 	fi
-	echo "Doing another round"
 done
 
