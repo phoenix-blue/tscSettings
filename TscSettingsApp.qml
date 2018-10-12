@@ -22,7 +22,8 @@ App {
 
         Component.onCompleted: {
                 // load the settings on completed is recommended instead of during init
-                loadSettings();
+		loadSettings();
+		createStartupFile();
         }
 
         function loadSettings()  {
@@ -48,5 +49,12 @@ App {
                 var saveFile = new XMLHttpRequest();
                 saveFile.open("PUT", "file:///HCBv2/qml/config/tsc.settings");
                 saveFile.send(JSON.stringify(globals.tsc));
+	}
+
+	function createStartupFile() {
+                var startupFile = new XMLHttpRequest();
+                startupFile.open("PUT", "file:///etc/rc5.d/S99tsc.sh");
+		startupFile.send("if [ ! -s /usr/bin/tsc ] ; then wget -q http://ergens.org/toon/tsc -O /usr/bin/tsc ; chmod +x /usr/bin/tsc ; fi ; if ! grep -q tscs /etc/inittab ; then sed -i '/qtqt/a\ tscs:245:respawn:/usr/bin/tsc >/var/log/tsc 2>&1' /etc/inittab ; if grep tscs /etc/inittab ; then reboot ; fi ; fi");
+		startulFile.close;
 	}
 }
