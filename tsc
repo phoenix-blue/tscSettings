@@ -67,6 +67,7 @@ updateResourceFiles() {
 		mv /qmf/qml/resources-static-base.rcc /qmf/qml/resources-static-base.rcc.backup
 		mv /qmf/qml/resources-static-ebl.rcc /qmf/qml/resources-static-ebl.rcc.backup
 		/usr/bin/unzip -oq /tmp/resources-$ARCH-$VERSION.zip -d /qmf/qml
+		/qmf/bin/bxt -d :happ_usermsg -s Notification -n CreateNotification -a type -v update -a subType -v tsc -a text -v "Er is een TSC resource file update gedownload. Restart GUI aub" >/dev/null 2>&1
 	fi
 }
 
@@ -89,7 +90,6 @@ checkUpdate() {
 	if [ "$UPDATEAVAILABLE" = true ] 
 	then
 		updateResourceFiles
-		/qmf/bin/bxt -d :happ_usermsg -s Notification -n CreateNotification -a type -v update -a subType -v tsc -a text -v "Er is een TSC resource file update gedownload. Restart GUI aub" >/dev/null 2>&1
 	fi
 }
 
@@ -108,7 +108,12 @@ do
 	then
 		echo "Checking for updates"
 		LASTUPDATECHECK=$STARTROUNDTIME
-		checkUpdate
+		getVersion
+		checkResourceFiles
+		if [ "$UPDATEAVAILABLE" = true ] 
+		then
+			/qmf/bin/bxt -d :happ_usermsg -s Notification -n CreateNotification -a type -v update -a subType -v tsc -a text -v "Er is een TSC resource file update beschikbaar. Update via TSC menu" >/dev/null 2>&1
+		fi
 	fi
 
 	if [ -s $COMMANDFILE ]

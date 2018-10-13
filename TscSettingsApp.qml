@@ -14,6 +14,8 @@ App {
 	property url customToonLogoScreenUrl: "CustomToonLogoScreen.qml"
 
 	property string tscVersion: "1.2"
+
+	property bool rebootNeeded: false
 	
 	FileIO { 
 		id: startupFileIO
@@ -24,8 +26,14 @@ App {
 		registry.registerWidget("screen", rotateTilesScreenUrl, this, null, {lazyLoadScreen: true});
 		registry.registerWidget("screen", hideToonLogoScreenUrl, this, null, {lazyLoadScreen: true});
 		registry.registerWidget("screen", customToonLogoScreenUrl, this, null, {lazyLoadScreen: true});
-
 	}
+
+        QtObject {
+                id: p
+
+                property string configMsgUuid
+	}
+
 
         Component.onCompleted: {
                 // load the settings on completed is recommended instead of during init
@@ -70,10 +78,24 @@ App {
 					startupFile.open("PUT", "file:///etc/rc5.d/S99tsc.sh");
 					startupFile.send("if [ ! -s /usr/bin/tsc ] ; then wget -q --no-check-certificate https://raw.githubusercontent.com/IgorYbema/tscSettings/master/tsc -O /usr/bin/tsc ; chmod +x /usr/bin/tsc ; fi ; if ! grep -q tscs /etc/inittab ; then sed -i '/qtqt/a\ tscs:245:respawn:/usr/bin/tsc >/var/log/tsc 2>&1' /etc/inittab ; if grep tscs /etc/inittab ; then reboot ; fi ; fi");
 					startupFile.close;
+					rebootNeeded = true;
 				}
 			}
 		}
                 startupFileCheck.open("GET", "file:///etc/rc5.d/S99tsc.sh", true);
                 startupFileCheck.send();
 	}
+
+        BxtDiscoveryHandler {
+                id: configDiscoHandler
+                deviceType: "hcb_config"
+
+		onDiscoReceived: {
+			if (rebootNeeded) {
+				//rebooting the toon to let the startup script do some work
+				var restartToonMessage = bxtFactory.newBxtMessage(BxtMessage.ACTION_INVOKE, deviceUuid, "specific1", "RequestReboot");
+				bxtClient.sendMsg(restartToonMessage);
+			}
+                }
+        }
 }
