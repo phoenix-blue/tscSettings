@@ -6,6 +6,7 @@
 ROUNDWAIT=5
 UPDATECHECKINTERVAL=86400
 STARTTIME=`date +%s`
+LASTTIMEWLPM=`date +%s` 
 LASTUPDATECHECK=0
 COMMANDFILE=/tmp/tsc.command
 
@@ -38,7 +39,7 @@ checkResourceFiles() {
 	VERSIONSAVAILABLE=`curl -Nks http://qutility.nl/resourcefiles/resource.file.versions`
 	MD5NEW=`echo "$VERSIONSAVAILABLE" | grep $ARCH | grep $VERSION | grep base | cut -d\, -f4`
 	MD5NOW=`/usr/bin/md5sum /qmf/qml/resources-static-base.rcc | cut -d\  -f1`
-	if [ !  "$MD5NOW" == "$MD5NEW" ]
+	if [ !  "$MD5NOW" == "$MD5NEW" ] && [ -n "$MD5NEW" ]
 	then
 		echo "Base resource file update available!"
 		UPDATEAVAILABLE=true
@@ -46,7 +47,7 @@ checkResourceFiles() {
 
 	MD5NEW=`echo "$VERSIONSAVAILABLE" | grep $ARCH | grep $VERSION | grep ebl | cut -d\, -f4`
 	MD5NOW=`/usr/bin/md5sum /qmf/qml/resources-static-ebl.rcc | cut -d\  -f1`
-	if [ !  "$MD5NOW" == "$MD5NEW" ]
+	if [ !  "$MD5NOW" == "$MD5NEW" ] && [ -n "$MD5NEW" ]
 	then
 		echo "EBL resource file update available!"
 		UPDATEAVAILABLE=true
@@ -62,7 +63,7 @@ updateResourceFiles() {
 
 	if [ ! $RESULT == 0 ]
 	then
-		echo "Could not download a resources.rcc file for this version! Continuing, but your custom apps probably dont work anymore"
+		echo "Could not download new resources.rcc file for this version!" 
 	else
 		mv /qmf/qml/resources-static-base.rcc /qmf/qml/resources-static-base.rcc.backup
 		mv /qmf/qml/resources-static-ebl.rcc /qmf/qml/resources-static-ebl.rcc.backup
@@ -100,6 +101,7 @@ flushFirewall() {
 }
 
 
+
 echo "Starting TSC support script"
 while true
 do
@@ -112,7 +114,7 @@ do
 		checkResourceFiles
 		if [ "$UPDATEAVAILABLE" = true ] 
 		then
-			/qmf/bin/bxt -d :happ_usermsg -s Notification -n CreateNotification -a type -v update -a subType -v tsc -a text -v "Er is een TSC resource file update beschikbaar. Update via TSC menu" >/dev/null 2>&1
+			/qmf/bin/bxt -d :happ_usermsg -s Notification -n CreateNotification -a type -v update -a subType -v tsc -a text -v "Er is een TSC resource file update beschikbaar. Update via TSC menu aub" >/dev/null 2>&1
 		fi
 	fi
 
@@ -136,6 +138,16 @@ do
 		rm -f $COMMANDFILE
 	fi
 
+	# at end of round do wifi fix if NXT and wait until next round
+	if [ "$ARCH" == "nxt" ]
+	then
+		if [ `/sbin/wl PM` -ne 0 ]
+		then
+			echo "Wireless PM got changed again, last time fixed $((`date +%s` - $LASTTIMEWLPM )) seconds ago"
+			/sbin/wl PM 0
+			LASTTIMEWLPM=`date +%s` 
+		fi
+	fi
 	WAITTIME=$(( $STARTROUNDTIME + $ROUNDWAIT - `date +%s` )) 
 	if  [[ $WAITTIME -gt 0  ]]
 	then
