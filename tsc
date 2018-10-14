@@ -91,6 +91,8 @@ checkUpdate() {
 	if [ "$UPDATEAVAILABLE" = true ] 
 	then
 		updateResourceFiles
+	else
+		/qmf/bin/bxt -d :happ_usermsg -s Notification -n CreateNotification -a type -v update -a subType -v tsc -a text -v "Er is geen TSC update gevonden" >/dev/null 2>&1
 	fi
 }
 
