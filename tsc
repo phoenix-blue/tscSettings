@@ -12,7 +12,8 @@ COMMANDFILE=/tmp/tsc.command
 
 
 checkSelfUpdate() {
-	MD5TSCONLINE=`curl -Nks https://raw.githubusercontent.com/IgorYbema/tscSettings/master/tsc.md5 | cut -d\  -f1`
+        CURRENTIME=`date +%s`
+	MD5TSCONLINE=`curl -Nks https://raw.githubusercontent.com/IgorYbema/tscSettings/master/tsc.md5?$CURRENTTIME | cut -d\  -f1`
 	MD5TSCNOW=`/usr/bin/md5sum /usr/bin/tsc | cut -d\  -f1`
 	if [ !  "$MD5TSCNOW" == "$MD5TSCONLINE" ] && [ -n "$MD5TSCONLINE" ]
 	then
