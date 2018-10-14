@@ -13,7 +13,7 @@ App {
 	property url hideToonLogoScreenUrl: "HideToonLogoScreen.qml"
 	property url customToonLogoScreenUrl: "CustomToonLogoScreen.qml"
 
-	property string tscVersion: "1.2"
+	property string tscVersion: "1.2.1"
 
 	property bool rebootNeeded: false
 	
