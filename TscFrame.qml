@@ -194,6 +194,28 @@ Widget {
 			}
 		}
 
+		StandardButton {
+			id: flushFirewallButton
+
+			text: qsTr("Flush firewall rules")
+
+			height: 40 
+
+			anchors {
+				left: checkUpdateButton.right
+				top: checkUpdateButton.top
+				leftMargin: 20
+			}
+
+			topClickMargin: 2
+			onClicked: {
+				var commandFile = new XMLHttpRequest();
+				commandFile.open("PUT", "file:///tmp/tsc.command");
+				commandFile.send("flushfirewall");
+				commandFile.close
+			}
+		}
+
 	}
 	Text {
        	         id: versionText
