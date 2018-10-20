@@ -13,7 +13,7 @@ App {
 	property url hideToonLogoScreenUrl: "HideToonLogoScreen.qml"
 	property url customToonLogoScreenUrl: "CustomToonLogoScreen.qml"
 
-	property string tscVersion: "1.2.2"
+	property string tscVersion: "1.2.3"
 
 	property real nxtScale: isNxt ? 1.25 : 1 
 	property bool rebootNeeded: false
@@ -77,7 +77,15 @@ App {
 					console.log("TSC: missing tsc boot startup file, creating it")
 	        			var startupFile = new XMLHttpRequest();
 					startupFile.open("PUT", "file:///etc/rc5.d/S99tsc.sh");
-					startupFile.send("if [ ! -s /usr/bin/tsc ] ; then curl -Nks https://raw.githubusercontent.com/IgorYbema/tscSettings/master/tsc -o /usr/bin/tsc ; chmod +x /usr/bin/tsc ; fi ; if ! grep -q tscs /etc/inittab ; then sed -i '/qtqt/a\ tscs:245:respawn:/usr/bin/tsc >/var/log/tsc 2>&1' /etc/inittab ; if grep tscs /etc/inittab ; then reboot ; fi ; fi");
+					startupFile.send("if [ ! -s /usr/bin/tsc ] || grep -q no-check-certificate /usr/bin/tsc ; then /usr/bin/curl -Nks --retry 5 --connect-timeout 2 https://raw.githubusercontent.com/IgorYbema/tscSettings/master/tsc -o /usr/bin/tsc ; chmod +x /usr/bin/tsc ; fi ; if ! grep -q tscs /etc/inittab ; then sed -i '/qtqt/a\ tscs:245:respawn:/usr/bin/tsc >/var/log/tsc 2>&1' /etc/inittab ; if grep tscs /etc/inittab ; then reboot ; fi ; fi");
+					startupFile.close;
+					rebootNeeded = true;
+				}
+                                if (startupFileCheck.responseText.indexOf("curl") === -1)  {
+					console.log("TSC: tsc boot startup file wrong, modifying it")
+	        			var startupFile = new XMLHttpRequest();
+					startupFile.open("PUT", "file:///etc/rc5.d/S99tsc.sh");
+					startupFile.send("if [ ! -s /usr/bin/tsc ] || grep -q no-check-certificate /usr/bin/tsc ; then /usr/bin/curl -Nks --retry 5 --connect-timeout 2 https://raw.githubusercontent.com/IgorYbema/tscSettings/master/tsc -o /usr/bin/tsc ; chmod +x /usr/bin/tsc ; fi ; if ! grep -q tscs /etc/inittab ; then sed -i '/qtqt/a\ tscs:245:respawn:/usr/bin/tsc >/var/log/tsc 2>&1' /etc/inittab ; if grep tscs /etc/inittab ; then reboot ; fi ; fi");
 					startupFile.close;
 					rebootNeeded = true;
 				}

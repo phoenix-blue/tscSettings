@@ -89,7 +89,7 @@ Widget {
 			id: hideToonLogoLabel
 			anchors {
 				top: rotateTilesLabel.bottom
-				topMargin: Math.round(30 * 1.25)
+				topMargin: Math.round(30 * app.nxtScale)
 				left: parent.left
 				right: hideToonLogoButton.left
 				rightMargin: 8
@@ -122,7 +122,7 @@ Widget {
 			id: customToonLogoLabel
 			anchors {
 				top: hideToonLogoButton.bottom
-				topMargin: Math.round(30 * 1.25)
+				topMargin: Math.round(30 * app.nxtScale)
 				left: parent.left
 				right: hideToonLogoButton.left
 				rightMargin: 8
@@ -162,7 +162,7 @@ Widget {
 			anchors {
 				left: parent.left
 				top: customToonLogoLabel.bottom
-				topMargin: Math.round(30 * 1.25)
+				topMargin: Math.round(30 * app.nxtScale)
 			}
 
 			topClickMargin: 2
@@ -180,9 +180,9 @@ Widget {
 			height: 40 
 
 			anchors {
-				left: parent.left
-				top: restartGuiButton.bottom
-				topMargin: Math.round(30 * 1.25)
+				left: restartGuiButton.right
+				top: restartGuiButton.top
+				leftMargin: 20
 			}
 
 			topClickMargin: 2

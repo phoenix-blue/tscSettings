@@ -60,11 +60,11 @@ Screen {
 	RadioButtonList {
 		id: radioButtonList
 		width: Math.round(220 * 1.28)
-		height: Math.round(200 * 1.25)
+		height: Math.round(200 * app.scaleNxt)
 
 		anchors {
 			top: bodyText.baseline
-			topMargin: Math.round(60 * 1.25)
+			topMargin: Math.round(60 * app.scaleNxt)
 			left: parent.left
 			leftMargin: isNxt ? 200 : 100
 		}
@@ -82,11 +82,11 @@ Screen {
 	RadioButtonList {
 		id: radioButtonList2
 		width: Math.round(220 * 1.28)
-		height: Math.round(200 * 1.25)
+		height: Math.round(200 * app.scaleNxt)
 
 		anchors {
 			top: bodyText.baseline
-			topMargin: Math.round(60 * 1.25)
+			topMargin: Math.round(60 * app.scaleNxt)
 			left: radioButtonList.right
 			leftMargin: 10 
 		}

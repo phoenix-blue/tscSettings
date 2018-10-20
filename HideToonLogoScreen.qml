@@ -20,7 +20,7 @@ Screen {
 	RadioButtonList {
 		id: radioButtonList
 		width: Math.round(220 * 1.28)
-		height: Math.round(250 * 1.25)
+		height: Math.round(250 * app.scaleNxt)
 
 		anchors.centerIn: parent
 
