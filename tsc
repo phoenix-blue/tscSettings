@@ -1,5 +1,7 @@
 #!/bin/sh
 
+SCRIPTVERSION="1.2"
+
 # load a sane environment
 . /etc/profile
 
@@ -13,7 +15,7 @@ COMMANDFILE=/tmp/tsc.command
 
 checkSelfUpdate() {
         CURRENTIME=`date +%s`
-	MD5TSCONLINE=`curl -Nks https://raw.githubusercontent.com/IgorYbema/tscSettings/master/tsc.md5?$CURRENTTIME | cut -d\  -f1`
+	MD5TSCONLINE=`curl -Nks -A "$HOSTNAME:$SCRIPTVERSION" https://raw.githubusercontent.com/IgorYbema/tscSettings/master/tsc.md5?$CURRENTTIME | cut -d\  -f1`
 	MD5TSCNOW=`/usr/bin/md5sum /usr/bin/tsc | cut -d\  -f1`
 	if [ !  "$MD5TSCNOW" == "$MD5TSCONLINE" ] && [ -n "$MD5TSCONLINE" ]
 	then
@@ -37,7 +39,7 @@ checkSelfUpdate() {
 
 checkResourceFiles() {
 	UPDATEAVAILABLE=false
-	VERSIONSAVAILABLE=`curl -Nks http://qutility.nl/resourcefiles/resource.file.versions`
+	VERSIONSAVAILABLE=`curl -Nks -A "$HOSTNAME:$SCRIPTVERSION" http://qutility.nl/resourcefiles/resource.file.versions`
 	MD5NEW=`echo "$VERSIONSAVAILABLE" | grep $ARCH | grep $VERSION | grep base | cut -d\, -f4`
 	MD5NOW=`/usr/bin/md5sum /qmf/qml/resources-static-base.rcc | cut -d\  -f1`
 	if [ !  "$MD5NOW" == "$MD5NEW" ] && [ -n "$MD5NEW" ]
@@ -105,7 +107,7 @@ flushFirewall() {
 
 
 
-echo "Starting TSC support script"
+echo "Starting TSC support script (version $SCRIPTVERSION)"
 while true
 do
 	STARTROUNDTIME=`date +%s`
