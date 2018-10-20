@@ -18,7 +18,7 @@ checkSelfUpdate() {
 	if [ !  "$MD5TSCNOW" == "$MD5TSCONLINE" ] && [ -n "$MD5TSCONLINE" ]
 	then
 		echo "There is a new version of the TSC script available. Updating and restarting!"
-		/usr/bin/wget -q --no-cache --no-check-certificate https://raw.githubusercontent.com/IgorYbema/tscSettings/master/tsc -O /usr/bin/tsc.new -T 5 -t 2
+		curl -Nks https://raw.githubusercontent.com/IgorYbema/tscSettings/master/tsc -o /usr/bin/tsc.new
 		MD5TSCNOW=`/usr/bin/md5sum /usr/bin/tsc.new | cut -d\  -f1`
 		if [ "$MD5TSCNOW" == "$MD5TSCONLINE" ]
 		then
