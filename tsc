@@ -1,6 +1,6 @@
 #!/bin/sh
 
-SCRIPTVERSION="1.2"
+SCRIPTVERSION="1.3"
 
 # load a sane environment
 . /etc/profile
@@ -27,7 +27,7 @@ checkSelfUpdate() {
 			echo "Download ok! Replacing myself and restarting."
 			mv /usr/bin/tsc.new /usr/bin/tsc
 			chmod +x /usr/bin/tsc
-			/qmf/bin/bxt -d :happ_usermsg -s Notification -n CreateNotification -a type -v update -a subType -v tsc -a text -v "Er is een nieuwe TSC support script gedownload. Script is gerestart." >/dev/null 2>&1
+			/qmf/bin/bxt -d :happ_usermsg -s Notification -n CreateNotification -a type -v tsc -a subType -v notify -a text -v "Er is een nieuwe TSC support script gedownload. Script is gerestart." >/dev/null 2>&1
 			sleep 5
 			killall -9 tsc
 			exit
@@ -71,7 +71,7 @@ updateResourceFiles() {
 		mv /qmf/qml/resources-static-base.rcc /qmf/qml/resources-static-base.rcc.backup
 		mv /qmf/qml/resources-static-ebl.rcc /qmf/qml/resources-static-ebl.rcc.backup
 		/usr/bin/unzip -oq /tmp/resources-$ARCH-$VERSION.zip -d /qmf/qml
-		/qmf/bin/bxt -d :happ_usermsg -s Notification -n CreateNotification -a type -v update -a subType -v tsc -a text -v "Er is een TSC resource file update gedownload. Restart GUI aub" >/dev/null 2>&1
+		/qmf/bin/bxt -d :happ_usermsg -s Notification -n CreateNotification -a type -v tsc -a subType -v update -a text -v "Er is een TSC resource file update gedownload. Restart GUI aub" >/dev/null 2>&1
 	fi
 }
 
@@ -95,14 +95,14 @@ checkUpdate() {
 	then
 		updateResourceFiles
 	else
-		/qmf/bin/bxt -d :happ_usermsg -s Notification -n CreateNotification -a type -v update -a subType -v tsc -a text -v "Er is geen TSC update gevonden" >/dev/null 2>&1
+		/qmf/bin/bxt -d :happ_usermsg -s Notification -n CreateNotification -a type -v tsc -a subType -v notify -a text -v "Er is geen TSC update gevonden" >/dev/null 2>&1
 	fi
 }
 
 flushFirewall() {
 	echo "Flushing firewall rules"
 	iptables -F
-	/qmf/bin/bxt -d :happ_usermsg -s Notification -n CreateNotification -a type -v firewall -a subType -v tsc -a text -v "Firewall regels verwijderd" >/dev/null 2>&1
+	/qmf/bin/bxt -d :happ_usermsg -s Notification -n CreateNotification -a type -v tsc -a subType -v firewall -a text -v "Firewall regels verwijderd" >/dev/null 2>&1
 }
 
 
@@ -119,7 +119,7 @@ do
 		checkResourceFiles
 		if [ "$UPDATEAVAILABLE" = true ] 
 		then
-			/qmf/bin/bxt -d :happ_usermsg -s Notification -n CreateNotification -a type -v update -a subType -v tsc -a text -v "Er is een TSC resource file update beschikbaar. Update via TSC menu aub" >/dev/null 2>&1
+			/qmf/bin/bxt -d :happ_usermsg -s Notification -n CreateNotification -a type -v tsc -a subType -v update -a text -v "Er is een TSC resource file update beschikbaar. Update via TSC menu aub" >/dev/null 2>&1
 		fi
 	fi
 

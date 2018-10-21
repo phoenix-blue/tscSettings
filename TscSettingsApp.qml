@@ -12,8 +12,9 @@ App {
 	property url rotateTilesScreenUrl: "RotateTilesScreen.qml"
 	property url hideToonLogoScreenUrl: "HideToonLogoScreen.qml"
 	property url customToonLogoScreenUrl: "CustomToonLogoScreen.qml"
+        property url settingsScreenUrl: "qrc:/apps/settings/SettingsScreen.qml"
 
-	property string tscVersion: "1.2.3"
+	property string tscVersion: "1.2.4"
 
 	property real nxtScale: isNxt ? 1.25 : 1 
 	property bool rebootNeeded: false
@@ -27,6 +28,8 @@ App {
 		registry.registerWidget("screen", rotateTilesScreenUrl, this, null, {lazyLoadScreen: true});
 		registry.registerWidget("screen", hideToonLogoScreenUrl, this, null, {lazyLoadScreen: true});
 		registry.registerWidget("screen", customToonLogoScreenUrl, this, null, {lazyLoadScreen: true});
+                notifications.registerType("tsc", notifications.prio_HIGHEST, Qt.resolvedUrl("drawables/notification-update.svg"), settingsScreenUrl, {"categoryUrl": tscFrameUrl}, "Meerdere TSC notifications");
+		notifications.registerSubtype("tsc", "update", settingsScreenUrl, {"categoryUrl": tscFrameUrl});
 	}
 
         QtObject {
