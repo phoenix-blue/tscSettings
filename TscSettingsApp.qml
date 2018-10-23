@@ -10,11 +10,14 @@ App {
 
 	property url tscFrameUrl: "TscFrame.qml"
 	property url rotateTilesScreenUrl: "RotateTilesScreen.qml"
+	property url firmwareUpdateScreenUrl: "FirmwareUpdate.qml"
+        property url softwareUpdateInProgressPopupUrl: "SoftwareUpdateInProgressPopup.qml"
+        property Popup softwareUpdateInProgressPopup
 	property url hideToonLogoScreenUrl: "HideToonLogoScreen.qml"
 	property url customToonLogoScreenUrl: "CustomToonLogoScreen.qml"
         property url settingsScreenUrl: "qrc:/apps/settings/SettingsScreen.qml"
 
-	property string tscVersion: "1.2.4"
+	property string tscVersion: "1.2.5"
 
 	property real nxtScale: isNxt ? 1.25 : 1 
 	property bool rebootNeeded: false
@@ -23,13 +26,22 @@ App {
 		id: startupFileIO
 	}
 
+        FileIO {
+                id: downloadStatusFile
+                source: "file:///tmp/update.status.vars"
+                onError: console.log("Can't open /tmp/update.status.vars")
+        }
+
 	function init() {
 		registry.registerWidget("settingsFrame", tscFrameUrl, this, "tscFrame", {categoryName: "TSC", categoryWeight: 310});
 		registry.registerWidget("screen", rotateTilesScreenUrl, this, null, {lazyLoadScreen: true});
+		registry.registerWidget("screen", firmwareUpdateScreenUrl, this, null, {lazyLoadScreen: true});
 		registry.registerWidget("screen", hideToonLogoScreenUrl, this, null, {lazyLoadScreen: true});
 		registry.registerWidget("screen", customToonLogoScreenUrl, this, null, {lazyLoadScreen: true});
+		registry.registerWidget("popup", softwareUpdateInProgressPopupUrl, this,"softwareUpdateInProgressPopup");
                 notifications.registerType("tsc", notifications.prio_HIGHEST, Qt.resolvedUrl("drawables/notification-update.svg"), settingsScreenUrl, {"categoryUrl": tscFrameUrl}, "Meerdere TSC notifications");
 		notifications.registerSubtype("tsc", "update", settingsScreenUrl, {"categoryUrl": tscFrameUrl});
+		notifications.registerSubtype("tsc", "firmware", firmwareUpdateScreenUrl, {});
 	}
 
         QtObject {
@@ -97,6 +109,19 @@ App {
                 startupFileCheck.open("GET", "file:///etc/rc5.d/S99tsc.sh", true);
                 startupFileCheck.send();
 	}
+
+        function getSoftwareUpdateStatus() {
+                var downloadStatusText = downloadStatusFile.read();
+                var keysAndValues = downloadStatusText.split('&');
+                var retVal = {'action': '', 'item': 0}
+                var keyvaluepair = ''
+
+                for (var i = 0; i < keysAndValues.length; i++) {
+                        keyvaluepair = keysAndValues[i].split('=');
+                        retVal[keyvaluepair[0]] = keyvaluepair[1];
+                }
+                return retVal;
+        }
 
         BxtDiscoveryHandler {
                 id: configDiscoHandler

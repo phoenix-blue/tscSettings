@@ -175,7 +175,7 @@ Widget {
 		StandardButton {
 			id: checkUpdateButton
 
-			text: qsTr("Check TSC update")
+			text: qsTr("Check for updates")
 
 			height: 40 
 
