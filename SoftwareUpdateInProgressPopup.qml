@@ -20,7 +20,7 @@ Popup {
 			softwareUpdateProgressPopup.stopAnimation();
 			hide();
 			stage.openFullscreen(app.settingsScreenUrl);
-			qdialog.showDialog(qdialog.SizeLarge, qsTr("Update failed"), qsTr("update_failed_popup_text"));
+			qdialog.showDialog(qdialog.SizeLarge, "Update failed", "Toon firmware update failed. Please check the logs /var/log/tsc.toonupdate.log");
 		}
 	}
 

@@ -187,10 +187,16 @@ Widget {
 
 			topClickMargin: 2
 			onClicked: {
+				// remove old TSC notifications first
+				notifications.removeByTypeSubType("tsc","notify");
+				notifications.removeByTypeSubType("tsc","update");
+				notifications.removeByTypeSubType("tsc","firmware");
 				var commandFile = new XMLHttpRequest();
 				commandFile.open("PUT", "file:///tmp/tsc.command");
 				commandFile.send("tscupdate");
 				commandFile.close
+				checkUpdateButton.enabled=false;
+				disableButtonTimer.start();
 			}
 		}
 
@@ -230,5 +236,17 @@ Widget {
        	                 family: qfont.italic.name
        	         }
        	         color: colors.taTrafficSource
-       	 }
+	 }
+
+
+        Timer {
+                id: disableButtonTimer
+
+                interval: 5000 
+                onTriggered: {
+			checkUpdateButton.enabled=true;
+			disableButtonTimer.stop();
+                }
+        }
+
 }
