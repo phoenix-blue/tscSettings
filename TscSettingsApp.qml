@@ -10,6 +10,7 @@ App {
 
 	property url tscFrameUrl: "TscFrame.qml"
 	property url rotateTilesScreenUrl: "RotateTilesScreen.qml"
+	property url toggleFeaturesScreenUrl: "ToggleFeaturesScreen.qml"
 	property url firmwareUpdateScreenUrl: "FirmwareUpdate.qml"
         property url softwareUpdateInProgressPopupUrl: "SoftwareUpdateInProgressPopup.qml"
         property Popup softwareUpdateInProgressPopup
@@ -17,7 +18,7 @@ App {
 	property url customToonLogoScreenUrl: "CustomToonLogoScreen.qml"
         property url settingsScreenUrl: "qrc:/apps/settings/SettingsScreen.qml"
 
-	property string tscVersion: "1.2.6"
+	property string tscVersion: "1.3.0 (BETA)"
 
 	property real nxtScale: isNxt ? 1.25 : 1 
 	property bool rebootNeeded: false
@@ -35,6 +36,7 @@ App {
 	function init() {
 		registry.registerWidget("settingsFrame", tscFrameUrl, this, "tscFrame", {categoryName: "TSC", categoryWeight: 310});
 		registry.registerWidget("screen", rotateTilesScreenUrl, this, null, {lazyLoadScreen: true});
+		registry.registerWidget("screen", toggleFeaturesScreenUrl, this, null, {lazyLoadScreen: true});
 		registry.registerWidget("screen", firmwareUpdateScreenUrl, this, null, {lazyLoadScreen: true});
 		registry.registerWidget("screen", hideToonLogoScreenUrl, this, null, {lazyLoadScreen: true});
 		registry.registerWidget("screen", customToonLogoScreenUrl, this, null, {lazyLoadScreen: true});
