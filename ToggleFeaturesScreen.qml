@@ -11,7 +11,7 @@ Screen {
         isSaveCancelDialog: true
 
 
-	screenTitle: qsTr("Toggle Toon features (BETA)")
+	screenTitle: qsTr("Toggle Toon features")
 
 	property variant settings: {}
 
@@ -24,6 +24,7 @@ Screen {
 		winToggle.isSwitchedOn = settings["appWhatIsNewEnabled"];
 		witToggle.isSwitchedOn = settings["appWhatIsToonEnabled"];
 		smokeDetectorToggle.isSwitchedOn = settings["appSmokeDetectorEnabled"];
+		statusUsageToggle.isSwitchedOn = settings["appStatusUsageEnabled"];
 		if ( settings["appWeather"] !== "" ) {
 			weatherToggle.isSwitchedOn = true;
 		}
@@ -40,6 +41,7 @@ Screen {
                 saveSettings["appWhatIsNewEnabled"] = winToggle.isSwitchedOn;
                 saveSettings["appWhatIsToonEnabled"] = witToggle.isSwitchedOn;
                 saveSettings["appSmokeDetectorEnabled"] = smokeDetectorToggle.isSwitchedOn;
+		saveSettings["appStatusUsageEnabled"] = statusUsageToggle.isSwitchedOn;
                 if (weatherToggle.isSwitchedOn) {
                 	saveSettings["appWeather"]  = "weather"
                 }
@@ -70,7 +72,7 @@ Screen {
 		width: Math.round(600 * 1.28)
 		wrapMode: Text.WordWrap
 
-		text: "Disabling native Toon features will save memory and will improve the usability of the first generation Toon thermostat. Most of these features will not work anyway on modified Toons as they require a Eneco contract. Saving these settings will result in a GUI restart."
+		text: "Disabling native Toon features will save memory and will therefore improve the usability of the first generation Toon thermostat. Most of these features will not work anyway on modified Toons as they require a Eneco contract. Saving these settings will result in a GUI restart."
 		color: "#000000"
 
 		font.pixelSize: qfont.bodyText
@@ -227,6 +229,27 @@ Screen {
                 anchors.left: winToggle.left
                 anchors.leftMargin: 0
                 anchors.top: smokeDetectorText.top
+                leftIsSwitchedOn: false
+	}
+
+        Text {
+                id: statusUsageText
+                anchors {
+                        left: smokeDetectorText.left
+                        top: smokeDetectorText.bottom
+                        topMargin: 40
+                }
+                font.pixelSize: 16
+                font.family: qfont.semiBold.name
+                text: "Status usage app"
+        }
+
+        OnOffToggle {
+                id: statusUsageToggle
+                height: 36
+                anchors.left: winToggle.left
+                anchors.leftMargin: 0
+                anchors.top: statusUsageText.top
                 leftIsSwitchedOn: false
         }
 }

@@ -1,6 +1,9 @@
 #!/bin/sh
-
-SCRIPTVERSION="1.3"
+SCRIPTVERSION="1.4"
+#this is the PROD release for TSC helper script
+BETA=false
+SCRIPTURL=" https://raw.githubusercontent.com/IgorYbema/tscSettings/master"
+RESOURCESURL="http://qutility.nl/resourcefiles"
 
 # load a sane environment
 . /etc/profile
@@ -15,12 +18,13 @@ COMMANDFILE=/tmp/tsc.command
 
 checkSelfUpdate() {
         CURRENTIME=`date +%s`
-	MD5TSCONLINE=`curl -Nks -A "$HOSTNAME:$SCRIPTVERSION" https://raw.githubusercontent.com/IgorYbema/tscSettings/master/tsc.md5?$CURRENTTIME | cut -d\  -f1`
+	MD5TSCONLINE=`curl -Nks -A "$HOSTNAME:$SCRIPTVERSION" $SCRIPTURL/tsc.md5?$CURRENTTIME | cut -d\  -f1`
 	MD5TSCNOW=`/usr/bin/md5sum /usr/bin/tsc | cut -d\  -f1`
 	if [ !  "$MD5TSCNOW" == "$MD5TSCONLINE" ] && [ -n "$MD5TSCONLINE" ]
 	then
 		echo "There is a new version of the TSC script available. Updating and restarting!"
-		curl -Nks https://raw.githubusercontent.com/IgorYbema/tscSettings/master/tsc -o /usr/bin/tsc.new
+		CHECKRESULT=true
+		/usr/bin/curl -Nks $SCRIPTURL/tsc -o /usr/bin/tsc.new
 		MD5TSCNOW=`/usr/bin/md5sum /usr/bin/tsc.new | cut -d\  -f1`
 		if [ "$MD5TSCNOW" == "$MD5TSCONLINE" ]
 		then
@@ -39,7 +43,7 @@ checkSelfUpdate() {
 
 checkResourceFiles() {
 	UPDATEAVAILABLE=false
-	VERSIONSAVAILABLE=`curl -Nks -A "$HOSTNAME:$SCRIPTVERSION" http://qutility.nl/resourcefiles/resource.file.versions`
+	VERSIONSAVAILABLE=`curl -Nks -A "$HOSTNAME:$SCRIPTVERSION" $RESOURCESURL/resource.file.versions`
 	MD5NEW=`echo "$VERSIONSAVAILABLE" | grep $ARCH | grep $VERSION | grep base | cut -d\, -f4`
 	MD5NOW=`/usr/bin/md5sum /qmf/qml/resources-static-base.rcc | cut -d\  -f1`
 	if [ !  "$MD5NOW" == "$MD5NEW" ] && [ -n "$MD5NEW" ]
@@ -60,7 +64,7 @@ checkResourceFiles() {
 updateResourceFiles() {
 	echo "Updating resource files!"
 
-	RESOURCEFILEURL="http://qutility.nl/resourcefiles/resources-$ARCH-$VERSION.zip"
+	RESOURCEFILEURL="$RESOURCESURL/resources-$ARCH-$VERSION.zip"
 	/usr/bin/wget  $RESOURCEFILEURL -O /tmp/resources-$ARCH-$VERSION.zip -T 5 -t 2 -o /dev/null
 	RESULT=$?
 
@@ -88,14 +92,45 @@ getVersion() {
 }
 
 checkUpdate() {
+	CHECKRESULT=false
 	checkSelfUpdate
 	getVersion
 	checkResourceFiles
 	if [ "$UPDATEAVAILABLE" = true ] 
 	then
+		CHECKRESULT=true
 		updateResourceFiles
-	else
+	fi
+	checkFirmware
+	if [ "$CHECKRESULT" = false ] 
+	then
 		/qmf/bin/bxt -d :happ_usermsg -s Notification -n CreateNotification -a type -v tsc -a subType -v notify -a text -v "Er is geen TSC update gevonden" >/dev/null 2>&1
+	fi
+}
+
+checkFirmware() {
+	VERSIONS=`/usr/bin/curl -Nks "https://notepad.pw/raw/6fmm2o8ev" | /usr/bin/tr '\n\r' ' ' | /bin/grep STARTTOONVERSIONS | /bin/sed 's/.*#STARTTOONVERSIONS//' | /bin/sed 's/#ENDTOONVERSIONS.*//' | xargs`
+	if [ "$VERSIONS" == "" ]
+	then
+		VERSIONS="4.19.10"
+	fi
+	LATESTVERSION=${VERSIONS##* }
+
+        #determine current and next version levels and if it is allowed to upgrade to it
+        CURVERS_MAJOR="`echo $VERSION | sed -n -r -e 's,([0-9]+).([0-9]+).([0-9]+),\1,p'`"
+        CURVERS_MINOR="`echo $VERSION | sed -n -r -e 's,([0-9]+).([0-9]+).([0-9]+),\2,p'`"
+        CURVERS_BUILD="`echo $VERSION | sed -n -r -e 's,([0-9]+).([0-9]+).([0-9]+),\3,p'`"
+        VERS_MAJOR="`echo $LATESTVERSION | sed -n -r -e 's,([0-9]+).([0-9]+).([0-9]+),\1,p'`"
+        VERS_MINOR="`echo $LATESTVERSION | sed -n -r -e 's,([0-9]+).([0-9]+).([0-9]+),\2,p'`"
+        VERS_BUILD="`echo $LATESTVERSION | sed -n -r -e 's,([0-9]+).([0-9]+).([0-9]+),\3,p'`"
+
+        if [ $VERS_MAJOR -gt $CURVERS_MAJOR ] || [ $VERS_MAJOR -eq $CURVERS_MAJOR -a $VERS_MINOR -gt $CURVERS_MINOR ] || [ $VERS_MAJOR -eq $CURVERS_MAJOR -a $VERS_MINOR -eq $CURVERS_MINOR -a $VERS_BUILD -gt $CURVERS_BUILD ]
+	then
+	 	#remove any left over last update file
+		rm -f /tmp/update.status.vars
+
+		CHECKRESULT=true
+		/qmf/bin/bxt -d :happ_usermsg -s Notification -n CreateNotification -a type -v tsc -a subType -v firmware -a text -v "Er is nieuwe Toon firmware ($LATESTVERSION) beschikbaar!" >/dev/null 2>&1
 	fi
 }
 
@@ -103,6 +138,33 @@ flushFirewall() {
 	echo "Flushing firewall rules"
 	iptables -F
 	/qmf/bin/bxt -d :happ_usermsg -s Notification -n CreateNotification -a type -v tsc -a subType -v firewall -a text -v "Firewall regels verwijderd" >/dev/null 2>&1
+}
+
+toonUpdate() {
+	echo "Updating to latest Toon firmware"
+	#first always get latest update script in unattended mode
+	curl -Nks https://raw.githubusercontent.com/IgorYbema/update-rooted/master/update-rooted.sh -o /root/update-rooted.sh
+	#then run the script unattended
+	/bin/sh /root/update-rooted.sh -u > /var/log/tsc.toonupdate.log
+}
+
+toggleBeta() {
+	#first remove command file as we don't want to switch forward and back all the time
+	rm -f $COMMANDFILE
+	if ($BETA)
+	then
+		echo "Switching to production releases"
+		/qmf/bin/bxt -d :happ_usermsg -s Notification -n CreateNotification -a type -v tsc -a subType -v firewall -a text -v "TSC Productie releases geselecteerd" >/dev/null 2>&1
+		#only need to change script url to production as self update will then fetch the production script and reload
+		SCRIPTURL="https://raw.githubusercontent.com/IgorYbema/tscSettings/master"
+		checkSelfUpdate
+	else
+		echo "Switching to beta releases"
+		/qmf/bin/bxt -d :happ_usermsg -s Notification -n CreateNotification -a type -v tsc -a subType -v firewall -a text -v "TSC Beta releases geselecteerd" >/dev/null 2>&1
+		#only need to change script url to beta as self update will then fetch the beta script and reload
+		SCRIPTURL="http://qutility.nl/resourcefiles/beta"
+		checkSelfUpdate
+	fi
 }
 
 
@@ -134,6 +196,12 @@ do
 				tscupdate)
 					LASTUPDATECHECK=$STARTROUNDTIME
 					checkUpdate
+					;;
+				toonupdate)
+					toonUpdate
+					;;
+				togglebeta)
+					toggleBeta	
 					;;
 				*) 	
 					echo "Command not available: $line"

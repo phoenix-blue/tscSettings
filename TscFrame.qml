@@ -151,6 +151,39 @@ Widget {
 			}
 		}
 
+		SingleLabel {
+			id: toggleFeaturesLabel
+			anchors {
+				top: customToonLogoButton.bottom
+				topMargin: Math.round(30 * app.nxtScale)
+				left: parent.left
+				right: hideToonLogoButton.left
+				rightMargin: 8
+			}
+			leftText: "Toggle native Toon features" 
+			rightText: ""
+
+		}
+
+		IconButton {
+			id: toggleFeaturesButton
+
+			width: 45
+			height: toggleFeaturesLabel.height
+
+			iconSource: "qrc:/images/edit.svg"
+
+			anchors {
+				top: toggleFeaturesLabel.top
+				right: parent.right
+			}
+
+			topClickMargin: 3
+			onClicked: {
+				stage.openFullscreen(app.toggleFeaturesScreenUrl);
+			}
+		}
+
 
 		StandardButton {
 			id: restartGuiButton
@@ -161,7 +194,7 @@ Widget {
 
 			anchors {
 				left: parent.left
-				top: customToonLogoLabel.bottom
+				top: toggleFeaturesLabel.bottom
 				topMargin: Math.round(30 * app.nxtScale)
 			}
 
@@ -236,7 +269,27 @@ Widget {
        	                 family: qfont.italic.name
        	         }
        	         color: colors.taTrafficSource
-	 }
+	}
+
+	IconButton {
+		id: betaButton
+
+                width: isNxt ? 48 : 38
+                height: isNxt ? 63 : 50
+		iconSource: ""
+		anchors {
+			bottom: parent.bottom
+			right: parent.right
+		}
+                colorUp : "transparent"
+                colorDown : "transparent"
+                onClicked: { 
+				var commandFile = new XMLHttpRequest();
+				commandFile.open("PUT", "file:///tmp/tsc.command");
+				commandFile.send("togglebeta");
+				commandFile.close
+		 }
+        }
 
 
         Timer {
