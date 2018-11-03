@@ -35,6 +35,48 @@ Widget {
 		}
 	}
 
+	function validatePin(text, isFinalString) {
+		if (isFinalString) {
+			if (text === app.localSettings.lockPinCode) {
+				return null;
+			} else {
+				return { content: "You are not authorized to unlock the TSC settings" };
+			}
+		} else {
+			return null;
+		}
+	}
+
+	function setPin(text, isFinalString) {
+		if (isFinalString) {
+			var tempSettings = app.localSettings;
+			tempSettings.lockPinCode = text; 
+			app.localSettings = tempSettings;
+			app.saveSettingsTsc();
+			return null;
+		} else {
+			return null;
+		}
+	}
+
+
+	function toggleLocking() {
+		var tempSettings = app.localSettings; 
+		tempSettings.locked = !tempSettings.locked
+		app.localSettings = tempSettings;
+		app.saveSettingsTsc();
+		rotateTilesButton.enabled = !app.localSettings.locked;
+		hideToonLogoButton.enabled = !app.localSettings.locked;;
+		customToonLogoButton.enabled = !app.localSettings.locked;
+		toggleFeaturesButton.enabled = !app.localSettings.locked;
+		unlockButton.visible = app.localSettings.locked;
+		lockButton.visible = !app.localSettings.locked;
+		checkUpdateButton.visible = !app.localSettings.locked;
+		flushFirewallButton.visible = !app.localSettings.locked;
+		restartGuiButton.visible = !app.localSettings.locked;
+		restorePasswordButton.visible = !app.localSettings.locked;
+	}
+
 	onShown: {
 		updateRotateTiles();
 		updateHideToonLogo();
@@ -72,6 +114,8 @@ Widget {
 			width: 45
 			height: rotateTilesLabel.height
 
+			enabled: !app.localSettings.locked
+
 			iconSource: "qrc:/images/edit.svg" 
 
 			anchors {
@@ -89,7 +133,7 @@ Widget {
 			id: hideToonLogoLabel
 			anchors {
 				top: rotateTilesLabel.bottom
-				topMargin: Math.round(30 * app.nxtScale)
+				topMargin: Math.round(20 * app.nxtScale)
 				left: parent.left
 				right: hideToonLogoButton.left
 				rightMargin: 8
@@ -104,6 +148,8 @@ Widget {
 
 			width: 45
 			height: hideToonLogoLabel.height
+
+			enabled: !app.localSettings.locked
 
 			iconSource: "qrc:/images/edit.svg" 
 
@@ -122,7 +168,7 @@ Widget {
 			id: customToonLogoLabel
 			anchors {
 				top: hideToonLogoButton.bottom
-				topMargin: Math.round(30 * app.nxtScale)
+				topMargin: Math.round(20 * app.nxtScale)
 				left: parent.left
 				right: hideToonLogoButton.left
 				rightMargin: 8
@@ -137,6 +183,8 @@ Widget {
 
 			width: 45
 			height: customToonLogoLabel.height
+
+			enabled: !app.localSettings.locked
 
 			iconSource: "qrc:/images/edit.svg"
 
@@ -155,7 +203,7 @@ Widget {
 			id: toggleFeaturesLabel
 			anchors {
 				top: customToonLogoButton.bottom
-				topMargin: Math.round(30 * app.nxtScale)
+				topMargin: Math.round(20 * app.nxtScale)
 				left: parent.left
 				right: hideToonLogoButton.left
 				rightMargin: 8
@@ -173,6 +221,8 @@ Widget {
 
 			iconSource: "qrc:/images/edit.svg"
 
+			enabled: !app.localSettings.locked
+
 			anchors {
 				top: toggleFeaturesLabel.top
 				right: parent.right
@@ -186,21 +236,47 @@ Widget {
 
 
 		StandardButton {
-			id: restartGuiButton
+			id: unlockButton
 
-			text: qsTr("Restart GUI")
+			text: qsTr("Unlock TSC settings")
 
 			height: 40 
+
+			visible: app.localSettings.locked
 
 			anchors {
 				left: parent.left
 				top: toggleFeaturesLabel.bottom
-				topMargin: Math.round(30 * app.nxtScale)
+				topMargin: Math.round(20 * app.nxtScale)
 			}
 
 			topClickMargin: 2
 			onClicked: {
-				Qt.quit();	
+				qnumKeyboard.open("TSC unlock PIN code", "", "PIN", "" , toggleLocking, validatePin);
+				qnumKeyboard.state = "num_integer_clear_backspace";
+
+			}
+		}
+
+		StandardButton {
+			id: lockButton
+
+			text: qsTr("Lock TSC settings")
+
+			height: 40 
+
+			visible: !app.localSettings.locked
+
+			anchors {
+				left: parent.left
+				top: toggleFeaturesLabel.bottom
+				topMargin: Math.round(20 * app.nxtScale)
+			}
+
+			topClickMargin: 2
+			onClicked: {
+				qnumKeyboard.open("TSC unlock PIN code", "", "PIN", "" , toggleLocking, setPin);
+				qnumKeyboard.state = "num_integer_clear_backspace";
 			}
 		}
 
@@ -212,9 +288,11 @@ Widget {
 
 			height: 40 
 
+			visible: !app.localSettings.locked
+
 			anchors {
-				left: restartGuiButton.right
-				top: restartGuiButton.top
+				left: lockButton.right
+				top: lockButton.top
 				leftMargin: 20
 			}
 
@@ -240,6 +318,8 @@ Widget {
 
 			height: 40 
 
+			visible: !app.localSettings.locked
+
 			anchors {
 				left: checkUpdateButton.right
 				top: checkUpdateButton.top
@@ -255,51 +335,101 @@ Widget {
 			}
 		}
 
+		StandardButton {
+			id: restartGuiButton
+
+			text: qsTr("Restart GUI")
+
+			height: 40 
+
+			visible: !app.localSettings.locked
+
+			anchors {
+				left: parent.left
+				top: lockButton.bottom
+				topMargin: Math.round(20 * app.nxtScale)
+			}
+
+			topClickMargin: 2
+			onClicked: {
+				Qt.quit();	
+			}
+		}
+
+		StandardButton {
+			id: restorePasswordButton
+
+			text: qsTr("Restore password")
+
+			height: 40 
+
+			visible: !app.localSettings.locked
+
+			anchors {
+				left: restartGuiButton.right
+				top: restartGuiButton.top
+				leftMargin: 20
+			}
+
+			topClickMargin: 2
+			onClicked: {
+				var commandFile = new XMLHttpRequest();
+				commandFile.open("PUT", "file:///tmp/tsc.command");
+				commandFile.send("restorerootpassword");
+				commandFile.close
+			}
+		}
+
+
+
 	}
 	Text {
-       	         id: versionText
-       	         text: "Versie: " + app.tscVersion
-       	         anchors {
-       	                 baseline: parent.bottom
-       	                 baselineOffset: -5
-       	                 horizontalCenter: parent.horizontalCenter
-       	         }
-       	         font {
-       	                 pixelSize: isNxt ? 18 : 15
-       	                 family: qfont.italic.name
-       	         }
-       	         color: colors.taTrafficSource
+		id: versionText
+		text: "Versie: " + app.tscVersion
+		anchors {
+			baseline: parent.bottom
+			baselineOffset: -5
+			horizontalCenter: parent.horizontalCenter
+		}
+		font {
+			pixelSize: isNxt ? 18 : 15
+			family: qfont.italic.name
+		}
+		color: colors.taTrafficSource
 	}
 
 	IconButton {
 		id: betaButton
 
-                width: isNxt ? 48 : 38
-                height: isNxt ? 63 : 50
+		width: isNxt ? 48 : 38
+		height: isNxt ? 63 : 50
 		iconSource: ""
+
 		anchors {
 			bottom: parent.bottom
 			right: parent.right
 		}
-                colorUp : "transparent"
-                colorDown : "transparent"
-                onClicked: { 
+		colorUp : "transparent"
+		colorDown : "transparent"
+		onClicked: { 
+			if (!app.localSettings.locked) {
 				var commandFile = new XMLHttpRequest();
 				commandFile.open("PUT", "file:///tmp/tsc.command");
 				commandFile.send("togglebeta");
 				commandFile.close
-		 }
-        }
+			}
+		}
+	}
 
 
-        Timer {
-                id: disableButtonTimer
+	Timer {
+		id: disableButtonTimer
 
-                interval: 5000 
-                onTriggered: {
+		interval: 5000 
+		onTriggered: {
 			checkUpdateButton.enabled=true;
 			disableButtonTimer.stop();
-                }
-        }
+		}
+	}
 
 }

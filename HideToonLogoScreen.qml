@@ -14,7 +14,7 @@ Screen {
 			var myTsc = globals.tsc
 			myTsc["hideToonLogo"] = radioButtonList.currentIndex
 			globals.tsc = myTsc
-			app.saveGlobalsTsc();
+			app.saveSettingsTsc();
 	}
 
 	RadioButtonList {

@@ -24,7 +24,7 @@ Screen {
 			myTsc["customToonLogo"] = radioButtonList.currentIndex
 			myTsc["customToonLogoURL"] = customToonLogoURLLabel.inputText
 			globals.tsc = myTsc
-			app.saveGlobalsTsc();
+			app.saveSettingsTsc();
 	}
 
 	function saveURL(text) {

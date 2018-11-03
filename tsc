@@ -1,9 +1,10 @@
 #!/bin/sh
-SCRIPTVERSION="1.4"
+SCRIPTVERSION="1.5"
 #this is the PROD release for TSC helper script
 BETA=false
 SCRIPTURL=" https://raw.githubusercontent.com/IgorYbema/tscSettings/master"
 RESOURCESURL="http://qutility.nl/resourcefiles"
+
 
 # load a sane environment
 . /etc/profile
@@ -140,6 +141,17 @@ flushFirewall() {
 	/qmf/bin/bxt -d :happ_usermsg -s Notification -n CreateNotification -a type -v tsc -a subType -v firewall -a text -v "Firewall regels verwijderd" >/dev/null 2>&1
 }
 
+restoreRootPassword() {
+	echo "Restoring root password to 'toon'"
+	if [ "$ARCH" == "nxt" ]
+	then
+  		sed -i 's/root:[^:]*/root:FTR0zlZvsHEF2/' /etc/shadow
+	else
+		sed -i 's/root:[^:]*/root:FTR0zlZvsHEF2/' /etc/passwd
+	fi
+	/qmf/bin/bxt -d :happ_usermsg -s Notification -n CreateNotification -a type -v tsc -a subType -v password -a text -v "Root password restored to 'toon'" >/dev/null 2>&1
+}
+
 toonUpdate() {
 	echo "Updating to latest Toon firmware"
 	#first always get latest update script in unattended mode
@@ -185,6 +197,18 @@ do
 		fi
 	fi
 
+	# auto update in BETA mode each round
+        if ($BETA)
+        then
+	        checkSelfUpdate
+        	checkResourceFiles
+        	if [ "$UPDATEAVAILABLE" = true ]
+        	then
+                	CHECKRESULT=true
+                	updateResourceFiles
+        	fi
+	fi
+
 	if [ -s $COMMANDFILE ]
 	then
 		while IFS='' read -r line || [[ -n "$line" ]]; do
@@ -192,6 +216,9 @@ do
 			case $line in
 				flushfirewall)
 					flushFirewall
+					;;
+				restorerootpassword)
+					restoreRootPassword
 					;;
 				tscupdate)
 					LASTUPDATECHECK=$STARTROUNDTIME

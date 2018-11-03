@@ -26,7 +26,7 @@ Screen {
                  myTsc["rotateTilesDim"] = radioButtonList2.currentIndex
                  myTsc["rotateTilesSeconds"] = rotateTimerLabel.inputText 
                  globals.tsc = myTsc
-                 app.saveGlobalsTsc();
+                 app.saveSettingsTsc();
 	}
 
         function updateRotateTimerLabel(text) {

@@ -18,10 +18,16 @@ App {
 	property url customToonLogoScreenUrl: "CustomToonLogoScreen.qml"
         property url settingsScreenUrl: "qrc:/apps/settings/SettingsScreen.qml"
 
-	property string tscVersion: "1.3.0"
+	property string tscVersion: "1.3.1"
 
 	property real nxtScale: isNxt ? 1.25 : 1 
 	property bool rebootNeeded: false
+
+	property variant localSettings: {
+		locked: false,
+		lockPinCode: "1234"
+	}
+
 	
 	FileIO { 
 		id: startupFileIO
@@ -64,11 +70,16 @@ App {
                 settingsFile.onreadystatechange = function() {
                         if (settingsFile.readyState == XMLHttpRequest.DONE) {
                                 if (settingsFile.responseText.length > 0)  {
-                                        var temp = JSON.parse(settingsFile.responseText);
-                                        for (var setting in globals.tsc) {
-                                                if (!temp[setting])  { temp[setting] = globals.tsc[setting]; } // use default if no saved setting exists
+					var temp = JSON.parse(settingsFile.responseText);
+					var globalTemp = globals.tsc;
+					var localTemp = localSettings;
+                                        for (var setting in temp) {
+						console.log("TSC settings: ", setting, temp[setting]);
+						if (globalTemp[setting] !== undefined)  { globalTemp[setting] = temp[setting]; }
+						if (localTemp[setting] !== undefined)  { localTemp[setting] = temp[setting]; }
                                         }
-                                        globals.tsc = temp;
+                                        globals.tsc = globalTemp;
+                                        localSettings = localTemp;
 					if (stage.logo) stage.logo.visible = (globals.tsc["hideToonLogo"] !== 2 );
                                 }
                         }
@@ -77,11 +88,15 @@ App {
                 settingsFile.send();
         }
 
-	function saveGlobalsTsc() {
+	function saveSettingsTsc() {
                 // save the new settings into the json file
-                var saveFile = new XMLHttpRequest();
+		var saveFile = new XMLHttpRequest();
+		var saveSettings = globals.tsc;
+		for (var setting in localSettings) {
+			saveSettings[setting] = localSettings[setting];
+		}
                 saveFile.open("PUT", "file:///HCBv2/qml/config/tsc.settings");
-                saveFile.send(JSON.stringify(globals.tsc));
+                saveFile.send(JSON.stringify(saveSettings));
 	}
 
 	function createStartupFile() {
