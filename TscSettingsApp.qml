@@ -15,12 +15,13 @@ App {
         property url softwareUpdateInProgressPopupUrl: "SoftwareUpdateInProgressPopup.qml"
         property Popup softwareUpdateInProgressPopup
 	property url hideToonLogoScreenUrl: "HideToonLogoScreen.qml"
+	property url hideErrorSystrayScreenUrl: "HideErrorSystrayScreen.qml"
 	property url customToonLogoScreenUrl: "CustomToonLogoScreen.qml"
         property url settingsScreenUrl: "qrc:/apps/settings/SettingsScreen.qml"
 
-	property string tscVersion: "1.3.1"
+	property string tscVersion: "1.3.2b"
 
-	property real nxtScale: isNxt ? 1.25 : 1 
+	property real nxtScale: isNxt ? 1.5 : 1 
 	property bool rebootNeeded: false
 
 	property variant localSettings: {
@@ -45,6 +46,7 @@ App {
 		registry.registerWidget("screen", toggleFeaturesScreenUrl, this, null, {lazyLoadScreen: true});
 		registry.registerWidget("screen", firmwareUpdateScreenUrl, this, null, {lazyLoadScreen: true});
 		registry.registerWidget("screen", hideToonLogoScreenUrl, this, null, {lazyLoadScreen: true});
+		registry.registerWidget("screen", hideErrorSystrayScreenUrl, this, null, {lazyLoadScreen: true});
 		registry.registerWidget("screen", customToonLogoScreenUrl, this, null, {lazyLoadScreen: true});
 		registry.registerWidget("popup", softwareUpdateInProgressPopupUrl, this,"softwareUpdateInProgressPopup");
                 notifications.registerType("tsc", notifications.prio_HIGHEST, Qt.resolvedUrl("drawables/notification-update.svg"), settingsScreenUrl, {"categoryUrl": tscFrameUrl}, "Meerdere TSC notifications");

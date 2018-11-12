@@ -18,6 +18,10 @@ Widget {
 		}
 	}
 
+	function updateHideErrorSystray() {
+		hideErrorSystrayLabel.rightText = globals.tsc["hideErrorSystray"] ? "Enabled" : "Disabled";
+	}
+
 	function updateHideToonLogo() {
 		switch(globals.tsc["hideToonLogo"]) {
 			case 0: hideToonLogoLabel.rightText = "Disabled"; break;
@@ -67,6 +71,7 @@ Widget {
 		app.saveSettingsTsc();
 		rotateTilesButton.enabled = !app.localSettings.locked;
 		hideToonLogoButton.enabled = !app.localSettings.locked;;
+		hideErrorSystrayButton.enabled = !app.localSettings.locked;;
 		customToonLogoButton.enabled = !app.localSettings.locked;
 		toggleFeaturesButton.enabled = !app.localSettings.locked;
 		unlockButton.visible = app.localSettings.locked;
@@ -80,6 +85,7 @@ Widget {
 	onShown: {
 		updateRotateTiles();
 		updateHideToonLogo();
+		updateHideErrorSystray();
 		updateCustomToonLogo();
 	}
 
@@ -130,10 +136,45 @@ Widget {
 		}
 
 		SingleLabel {
-			id: hideToonLogoLabel
+			id: hideErrorSystrayLabel
 			anchors {
 				top: rotateTilesLabel.bottom
-				topMargin: Math.round(20 * app.nxtScale)
+				topMargin: Math.round(15 * app.nxtScale)
+				left: parent.left
+				right: hideErrorSystrayButton.left
+				rightMargin: 8
+			}
+			leftText: qsTr("Hide error systray icon")
+			rightText: ""
+
+		}
+
+		IconButton {
+			id: hideErrorSystrayButton
+
+			width: 45
+			height: hideErrorSystrayLabel.height
+
+			enabled: !app.localSettings.locked
+
+			iconSource: "qrc:/images/edit.svg" 
+
+			anchors {
+				top: hideErrorSystrayLabel.top
+				right: parent.right
+			}
+
+			topClickMargin: 3
+			onClicked: {
+				stage.openFullscreen(app.hideErrorSystrayScreenUrl);
+			}
+		}
+
+		SingleLabel {
+			id: hideToonLogoLabel
+			anchors {
+				top: hideErrorSystrayLabel.bottom
+				topMargin: Math.round(15 * app.nxtScale)
 				left: parent.left
 				right: hideToonLogoButton.left
 				rightMargin: 8
@@ -168,7 +209,7 @@ Widget {
 			id: customToonLogoLabel
 			anchors {
 				top: hideToonLogoButton.bottom
-				topMargin: Math.round(20 * app.nxtScale)
+				topMargin: Math.round(15 * app.nxtScale)
 				left: parent.left
 				right: hideToonLogoButton.left
 				rightMargin: 8
@@ -203,7 +244,7 @@ Widget {
 			id: toggleFeaturesLabel
 			anchors {
 				top: customToonLogoButton.bottom
-				topMargin: Math.round(20 * app.nxtScale)
+				topMargin: Math.round(15 * app.nxtScale)
 				left: parent.left
 				right: hideToonLogoButton.left
 				rightMargin: 8
@@ -247,7 +288,7 @@ Widget {
 			anchors {
 				left: parent.left
 				top: toggleFeaturesLabel.bottom
-				topMargin: Math.round(20 * app.nxtScale)
+				topMargin: Math.round(15 * app.nxtScale)
 			}
 
 			topClickMargin: 2
@@ -270,7 +311,7 @@ Widget {
 			anchors {
 				left: parent.left
 				top: toggleFeaturesLabel.bottom
-				topMargin: Math.round(20 * app.nxtScale)
+				topMargin: Math.round(15 * app.nxtScale)
 			}
 
 			topClickMargin: 2
@@ -347,7 +388,7 @@ Widget {
 			anchors {
 				left: parent.left
 				top: lockButton.bottom
-				topMargin: Math.round(20 * app.nxtScale)
+				topMargin: Math.round(15 * app.nxtScale)
 			}
 
 			topClickMargin: 2
