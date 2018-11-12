@@ -19,7 +19,7 @@ App {
 	property url customToonLogoScreenUrl: "CustomToonLogoScreen.qml"
         property url settingsScreenUrl: "qrc:/apps/settings/SettingsScreen.qml"
 
-	property string tscVersion: "1.3.2b"
+	property string tscVersion: "1.3.2"
 
 	property real nxtScale: isNxt ? 1.5 : 1 
 	property bool rebootNeeded: false
