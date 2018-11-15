@@ -1,20 +1,21 @@
 #!/bin/sh
-SCRIPTVERSION="1.5"
+SCRIPTVERSION="1.6"
 #this is the PROD release for TSC helper script
 BETA=false
 SCRIPTURL=" https://raw.githubusercontent.com/IgorYbema/tscSettings/master"
 RESOURCESURL="http://qutility.nl/resourcefiles"
 
-
 # load a sane environment
 . /etc/profile
 
 ROUNDWAIT=5
+BETACHECKTIME=0
 UPDATECHECKINTERVAL=86400
 STARTTIME=`date +%s`
 LASTTIMEWLPM=`date +%s` 
 LASTUPDATECHECK=0
 COMMANDFILE=/tmp/tsc.command
+NOTIFYUPDATE=true
 
 
 checkSelfUpdate() {
@@ -94,6 +95,7 @@ getVersion() {
 
 checkUpdate() {
 	CHECKRESULT=false
+	NOTIFYUPDATE=true
 	checkSelfUpdate
 	getVersion
 	checkResourceFiles
@@ -191,22 +193,48 @@ do
 		LASTUPDATECHECK=$STARTROUNDTIME
 		getVersion
 		checkResourceFiles
-		if [ "$UPDATEAVAILABLE" = true ] 
+		if [ "$UPDATEAVAILABLE" = true ] && [ "$NOTIFYUPDATE" = true ]
 		then
 			/qmf/bin/bxt -d :happ_usermsg -s Notification -n CreateNotification -a type -v tsc -a subType -v update -a text -v "Er is een TSC resource file update beschikbaar. Update via TSC menu aub" >/dev/null 2>&1
+			# only notify for available update if not already notified before. This will reset if user selects manual check
+			NOTIFYUPDATE=false
 		fi
 	fi
 
 	# auto update in BETA mode each round
         if ($BETA)
         then
-	        checkSelfUpdate
-        	checkResourceFiles
-        	if [ "$UPDATEAVAILABLE" = true ]
-        	then
-                	CHECKRESULT=true
-                	updateResourceFiles
-        	fi
+		if [[ $(( $LASTUPDATECHECK + $BETACHECKTIME )) -lt $STARTROUNDTIME ]]
+		then
+			echo "Checking BETA"
+			LASTUPDATECHECK=$STARTROUNDTIME
+			BETACHECKTIME=$(( BETACHECKTIME + ROUNDWAIT ))  # on every (failed) check the BETA time to wait increases
+	       		checkSelfUpdate
+        		checkResourceFiles
+        		if [ "$UPDATEAVAILABLE" = true ]
+        		then
+               	 		updateResourceFiles
+				killall -9 qt-gui
+				BETACHECKTIME=0 #reset beta check timer on succes new update found
+        		fi
+		fi
+		if [[ $BETACHECKTIME -ge 500 ]]
+		then
+			#switch to production as there is no active BETA development going on
+                	echo "Auto switching to production releases - no active BETA development going on"
+                	/qmf/bin/bxt -d :happ_usermsg -s Notification -n CreateNotification -a type -v tsc -a subType -v firewall -a text -v "TSC Productie releases geselecteerd" >/dev/null 2>&1
+		
+			#first update resource files to production
+			RESOURCESURL="http://qutility.nl/resourcefiles"
+        		checkResourceFiles
+               		updateResourceFiles
+			killall -9 qt-gui
+
+			#then get the production script (this will also restart this script)
+                	SCRIPTURL="https://raw.githubusercontent.com/IgorYbema/tscSettings/master"
+                	checkSelfUpdate
+		fi
+
 	fi
 
 	if [ -s $COMMANDFILE ]
