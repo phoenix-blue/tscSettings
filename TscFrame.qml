@@ -436,7 +436,7 @@ Widget {
 			pixelSize: isNxt ? 18 : 15
 			family: qfont.italic.name
 		}
-		color: colors.taTrafficSource
+		color: colors.tileTextColor
 	}
 
 	IconButton {

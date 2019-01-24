@@ -25,8 +25,8 @@ App {
 	property bool rebootNeeded: false
 
 	property variant localSettings: {
-		locked: false,
-		lockPinCode: "1234"
+		'locked': false,
+		'lockPinCode': "1234"
 	}
 
 	
