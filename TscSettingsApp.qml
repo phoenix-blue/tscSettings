@@ -1,4 +1,4 @@
-import QtQuick 1.1
+import QtQuick 2.1
 import BxtClient 1.0
 import FileIO 1.0
 
@@ -19,14 +19,14 @@ App {
 	property url customToonLogoScreenUrl: "CustomToonLogoScreen.qml"
         property url settingsScreenUrl: "qrc:/apps/settings/SettingsScreen.qml"
 
-	property string tscVersion: "1.3.2"
+	property string tscVersion: "1.4.0"
 
 	property real nxtScale: isNxt ? 1.5 : 1 
 	property bool rebootNeeded: false
 
 	property variant localSettings: {
-		locked: false,
-		lockPinCode: "1234"
+		'locked': false,
+		'lockPinCode': "1234"
 	}
 
 	

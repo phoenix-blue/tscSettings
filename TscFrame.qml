@@ -1,4 +1,4 @@
-import QtQuick 1.1
+import QtQuick 2.1
 
 import qb.base 1.0
 import qb.components 1.0
@@ -436,7 +436,7 @@ Widget {
 			pixelSize: isNxt ? 18 : 15
 			family: qfont.italic.name
 		}
-		color: colors.taTrafficSource
+		color: colors.tileTextColor
 	}
 
 	IconButton {

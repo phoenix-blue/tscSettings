@@ -1,5 +1,5 @@
 #!/bin/sh
-SCRIPTVERSION="1.6"
+SCRIPTVERSION="1.71"
 #this is the PROD release for TSC helper script
 BETA=false
 SCRIPTURL=" https://raw.githubusercontent.com/IgorYbema/tscSettings/master"
@@ -184,6 +184,10 @@ toggleBeta() {
 
 
 echo "Starting TSC support script (version $SCRIPTVERSION)"
+echo "Allowing SSH in firewall rules INPUT table"
+iptables -I INPUT -p tcp -m tcp --dport 22 --tcp-flags SYN,RST,ACK SYN -j ACCEPT
+#insert 60 sec wait for start tsc script to make sure BXT messages can be received
+sleep 60
 while true
 do
 	STARTROUNDTIME=`date +%s`
@@ -195,7 +199,7 @@ do
 		checkResourceFiles
 		if [ "$UPDATEAVAILABLE" = true ] && [ "$NOTIFYUPDATE" = true ]
 		then
-			/qmf/bin/bxt -d :happ_usermsg -s Notification -n CreateNotification -a type -v tsc -a subType -v update -a text -v "Er is een TSC resource file update beschikbaar. Update via TSC menu aub" >/dev/null 2>&1
+			/qmf/bin/bxt -d :happ_usermsg -w 0 -s Notification -n CreateNotification -a type -v tsc -a subType -v update -a text -v "Er is een TSC resource file update beschikbaar. Update via TSC menu aub" >/dev/null 2>&1
 			# only notify for available update if not already notified before. This will reset if user selects manual check
 			NOTIFYUPDATE=false
 		fi
