@@ -12,6 +12,7 @@ App {
 	property url rotateTilesScreenUrl: "RotateTilesScreen.qml"
 	property url toggleFeaturesScreenUrl: "ToggleFeaturesScreen.qml"
 	property url firmwareUpdateScreenUrl: "FirmwareUpdate.qml"
+	property url credentialsMobileAppScreenUrl: "CredentialsMobileAppScreen.qml"
         property url softwareUpdateInProgressPopupUrl: "SoftwareUpdateInProgressPopup.qml"
         property Popup softwareUpdateInProgressPopup
 	property url hideToonLogoScreenUrl: "HideToonLogoScreen.qml"
@@ -19,7 +20,7 @@ App {
 	property url customToonLogoScreenUrl: "CustomToonLogoScreen.qml"
         property url settingsScreenUrl: "qrc:/apps/settings/SettingsScreen.qml"
 
-	property string tscVersion: "1.4.0"
+	property string tscVersion: "1.5.0"
 
 	property real nxtScale: isNxt ? 1.5 : 1 
 	property bool rebootNeeded: false
@@ -48,6 +49,7 @@ App {
 		registry.registerWidget("screen", hideToonLogoScreenUrl, this, null, {lazyLoadScreen: true});
 		registry.registerWidget("screen", hideErrorSystrayScreenUrl, this, null, {lazyLoadScreen: true});
 		registry.registerWidget("screen", customToonLogoScreenUrl, this, null, {lazyLoadScreen: true});
+		registry.registerWidget("screen", credentialsMobileAppScreenUrl, this, null, {lazyLoadScreen: true});
 		registry.registerWidget("popup", softwareUpdateInProgressPopupUrl, this,"softwareUpdateInProgressPopup");
                 notifications.registerType("tsc", notifications.prio_HIGHEST, Qt.resolvedUrl("drawables/notification-update.svg"), settingsScreenUrl, {"categoryUrl": tscFrameUrl}, "Meerdere TSC notifications");
 		notifications.registerSubtype("tsc", "update", settingsScreenUrl, {"categoryUrl": tscFrameUrl});

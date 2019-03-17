@@ -1,5 +1,5 @@
 #!/bin/sh
-SCRIPTVERSION="1.71"
+SCRIPTVERSION="1.73"
 #this is the PROD release for TSC helper script
 BETA=false
 SCRIPTURL=" https://raw.githubusercontent.com/IgorYbema/tscSettings/master"
@@ -46,7 +46,7 @@ checkSelfUpdate() {
 checkResourceFiles() {
 	UPDATEAVAILABLE=false
 	VERSIONSAVAILABLE=`curl -Nks -A "$HOSTNAME:$SCRIPTVERSION" $RESOURCESURL/resource.file.versions`
-	MD5NEW=`echo "$VERSIONSAVAILABLE" | grep $ARCH | grep $VERSION | grep base | cut -d\, -f4`
+	MD5NEW=`echo "$VERSIONSAVAILABLE" | grep $ARCH | grep -F $VERSION | grep base | cut -d\, -f4`
 	MD5NOW=`/usr/bin/md5sum /qmf/qml/resources-static-base.rcc | cut -d\  -f1`
 	if [ !  "$MD5NOW" == "$MD5NEW" ] && [ -n "$MD5NEW" ]
 	then
@@ -54,7 +54,7 @@ checkResourceFiles() {
 		UPDATEAVAILABLE=true
 	fi
 
-	MD5NEW=`echo "$VERSIONSAVAILABLE" | grep $ARCH | grep $VERSION | grep ebl | cut -d\, -f4`
+	MD5NEW=`echo "$VERSIONSAVAILABLE" | grep $ARCH | grep -F $VERSION | grep ebl | cut -d\, -f4`
 	MD5NOW=`/usr/bin/md5sum /qmf/qml/resources-static-ebl.rcc | cut -d\  -f1`
 	if [ !  "$MD5NOW" == "$MD5NEW" ] && [ -n "$MD5NEW" ]
 	then
@@ -186,8 +186,12 @@ toggleBeta() {
 echo "Starting TSC support script (version $SCRIPTVERSION)"
 echo "Allowing SSH in firewall rules INPUT table"
 iptables -I INPUT -p tcp -m tcp --dport 22 --tcp-flags SYN,RST,ACK SYN -j ACCEPT
-#insert 60 sec wait for start tsc script to make sure BXT messages can be received
-sleep 60
+#insert wait cycle of 5 minutes on boot to make sure BXT messages can be received
+while [ `awk '{print int($1/60)}' /proc/uptime` -lt "5" ]
+do
+	echo "Waiting for toon boot"
+	sleep 30
+done
 while true
 do
 	STARTROUNDTIME=`date +%s`

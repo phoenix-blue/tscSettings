@@ -55,6 +55,8 @@ Screen {
 		Component.onCompleted: {
 			addItem("Disabled - Show");
 			addItem("Enabled - Hide");
+                        forceLayout();
+                        currentIndex = 0;
 		}
 	}
 
