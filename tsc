@@ -1,5 +1,5 @@
 #!/bin/sh
-SCRIPTVERSION="1.73"
+SCRIPTVERSION="1.74"
 #this is the PROD release for TSC helper script
 BETA=false
 SCRIPTURL=" https://raw.githubusercontent.com/IgorYbema/tscSettings/master"
@@ -112,7 +112,7 @@ checkUpdate() {
 }
 
 checkFirmware() {
-	VERSIONS=`/usr/bin/curl -Nks "https://notepad.pw/raw/6fmm2o8ev" | /usr/bin/tr '\n\r' ' ' | /bin/grep STARTTOONVERSIONS | /bin/sed 's/.*#STARTTOONVERSIONS//' | /bin/sed 's/#ENDTOONVERSIONS.*//' | xargs`
+	VERSIONS=`/usr/bin/curl -Nks "https://raw.githubusercontent.com/IgorYbema/update-rooted/master/toonversions" | /usr/bin/tr '\n\r' ' ' | /bin/grep STARTTOONVERSIONS | /bin/sed 's/.*#STARTTOONVERSIONS//' | /bin/sed 's/#ENDTOONVERSIONS.*//' | xargs`
 	if [ "$VERSIONS" == "" ]
 	then
 		VERSIONS="4.19.10"
