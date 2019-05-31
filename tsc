@@ -1,5 +1,5 @@
 #!/bin/sh
-SCRIPTVERSION="1.74"
+SCRIPTVERSION="1.8"
 #this is the PROD release for TSC helper script
 BETA=false
 SCRIPTURL=" https://raw.githubusercontent.com/IgorYbema/tscSettings/master"
@@ -16,10 +16,11 @@ LASTTIMEWLPM=`date +%s`
 LASTUPDATECHECK=0
 COMMANDFILE=/tmp/tsc.command
 NOTIFYUPDATE=true
+SOURCEFILES="http://files.domoticaforum.eu/uploads/Toon"
 
 
 checkSelfUpdate() {
-        CURRENTIME=`date +%s`
+	CURRENTIME=`date +%s`
 	MD5TSCONLINE=`curl -Nks -A "$HOSTNAME:$SCRIPTVERSION" $SCRIPTURL/tsc.md5?$CURRENTTIME | cut -d\  -f1`
 	MD5TSCNOW=`/usr/bin/md5sum /usr/bin/tsc | cut -d\  -f1`
 	if [ !  "$MD5TSCNOW" == "$MD5TSCONLINE" ] && [ -n "$MD5TSCONLINE" ]
@@ -33,7 +34,8 @@ checkSelfUpdate() {
 			echo "Download ok! Replacing myself and restarting."
 			mv /usr/bin/tsc.new /usr/bin/tsc
 			chmod +x /usr/bin/tsc
-			/qmf/bin/bxt -d :happ_usermsg -s Notification -n CreateNotification -a type -v tsc -a subType -v notify -a text -v "Er is een nieuwe TSC support script gedownload. Script is gerestart." >/dev/null 2>&1
+			#remove the notification - most users don't care about this
+			#/qmf/bin/bxt -d :happ_usermsg -s Notification -n CreateNotification -a type -v tsc -a subType -v notify -a text -v "Er is een nieuwe TSC support script gedownload. Script is gerestart." >/dev/null 2>&1
 			sleep 5
 			killall -9 tsc
 			exit
@@ -119,17 +121,17 @@ checkFirmware() {
 	fi
 	LATESTVERSION=${VERSIONS##* }
 
-        #determine current and next version levels and if it is allowed to upgrade to it
-        CURVERS_MAJOR="`echo $VERSION | sed -n -r -e 's,([0-9]+).([0-9]+).([0-9]+),\1,p'`"
-        CURVERS_MINOR="`echo $VERSION | sed -n -r -e 's,([0-9]+).([0-9]+).([0-9]+),\2,p'`"
-        CURVERS_BUILD="`echo $VERSION | sed -n -r -e 's,([0-9]+).([0-9]+).([0-9]+),\3,p'`"
-        VERS_MAJOR="`echo $LATESTVERSION | sed -n -r -e 's,([0-9]+).([0-9]+).([0-9]+),\1,p'`"
-        VERS_MINOR="`echo $LATESTVERSION | sed -n -r -e 's,([0-9]+).([0-9]+).([0-9]+),\2,p'`"
-        VERS_BUILD="`echo $LATESTVERSION | sed -n -r -e 's,([0-9]+).([0-9]+).([0-9]+),\3,p'`"
+	#determine current and next version levels and if it is allowed to upgrade to it
+	CURVERS_MAJOR="`echo $VERSION | sed -n -r -e 's,([0-9]+).([0-9]+).([0-9]+),\1,p'`"
+	CURVERS_MINOR="`echo $VERSION | sed -n -r -e 's,([0-9]+).([0-9]+).([0-9]+),\2,p'`"
+	CURVERS_BUILD="`echo $VERSION | sed -n -r -e 's,([0-9]+).([0-9]+).([0-9]+),\3,p'`"
+	VERS_MAJOR="`echo $LATESTVERSION | sed -n -r -e 's,([0-9]+).([0-9]+).([0-9]+),\1,p'`"
+	VERS_MINOR="`echo $LATESTVERSION | sed -n -r -e 's,([0-9]+).([0-9]+).([0-9]+),\2,p'`"
+	VERS_BUILD="`echo $LATESTVERSION | sed -n -r -e 's,([0-9]+).([0-9]+).([0-9]+),\3,p'`"
 
-        if [ $VERS_MAJOR -gt $CURVERS_MAJOR ] || [ $VERS_MAJOR -eq $CURVERS_MAJOR -a $VERS_MINOR -gt $CURVERS_MINOR ] || [ $VERS_MAJOR -eq $CURVERS_MAJOR -a $VERS_MINOR -eq $CURVERS_MINOR -a $VERS_BUILD -gt $CURVERS_BUILD ]
+	if [ $VERS_MAJOR -gt $CURVERS_MAJOR ] || [ $VERS_MAJOR -eq $CURVERS_MAJOR -a $VERS_MINOR -gt $CURVERS_MINOR ] || [ $VERS_MAJOR -eq $CURVERS_MAJOR -a $VERS_MINOR -eq $CURVERS_MINOR -a $VERS_BUILD -gt $CURVERS_BUILD ]
 	then
-	 	#remove any left over last update file
+		#remove any left over last update file
 		rm -f /tmp/update.status.vars
 
 		CHECKRESULT=true
@@ -147,7 +149,7 @@ restoreRootPassword() {
 	echo "Restoring root password to 'toon'"
 	if [ "$ARCH" == "nxt" ]
 	then
-  		sed -i 's/root:[^:]*/root:FTR0zlZvsHEF2/' /etc/shadow
+		sed -i 's/root:[^:]*/root:FTR0zlZvsHEF2/' /etc/shadow
 	else
 		sed -i 's/root:[^:]*/root:FTR0zlZvsHEF2/' /etc/passwd
 	fi
@@ -181,6 +183,47 @@ toggleBeta() {
 	fi
 }
 
+toonStore() {
+	echo "Toonstore instructed me to install or remove software"
+
+	if [ -s /tmp/packages_to_install.txt ]
+	then
+		for a in `cat /tmp/packages_to_install.txt |  tr -s ' ' '\n'`
+		do
+			echo "Installing: $a"
+			#look for depencies first
+			for line in `curl -Nfks --compressed $SOURCEFILES/apps/$a/dependencies.txt`
+			do
+				echo "Installing dependency: $line"
+				filename=`curl -Nfks --compressed $SOURCEFILES/pkgs/$line/Packages.gz | zcat | grep Filename| cut -d\  -f2`
+				echo $filename
+				if [ -n $filename ]
+				then
+					APPURL=$SOURCEFILES/pkgs/$line/$filename
+					opkg install $APPURL
+				fi
+			done
+			filename=`curl -Nfks --compressed $SOURCEFILES/apps/$a/Packages.gz | zcat | grep Filename| cut -d\  -f2`
+			echo $filename
+			if [ -n $filename ]
+			then
+				APPURL=$SOURCEFILES/apps/$a/$filename
+				opkg install $APPURL
+			fi
+		done
+		rm /tmp/packages_to_install.txt
+	fi
+	if [ -s /tmp/packages_to_delete.txt ]
+	then
+		for a in `cat /tmp/packages_to_delete.txt |  tr -s ' ' '\n' | cut -d\- -f1`
+		do
+			echo "Deleting: $a"
+			opkg remove $a
+		done
+		rm /tmp/packages_to_delete.txt
+	fi
+	killall -9 qt-gui
+}
 
 
 echo "Starting TSC support script (version $SCRIPTVERSION)"
@@ -210,37 +253,37 @@ do
 	fi
 
 	# auto update in BETA mode each round
-        if ($BETA)
-        then
+	if ($BETA)
+	then
 		if [[ $(( $LASTUPDATECHECK + $BETACHECKTIME )) -lt $STARTROUNDTIME ]]
 		then
 			echo "Checking BETA"
 			LASTUPDATECHECK=$STARTROUNDTIME
 			BETACHECKTIME=$(( BETACHECKTIME + ROUNDWAIT ))  # on every (failed) check the BETA time to wait increases
-	       		checkSelfUpdate
-        		checkResourceFiles
-        		if [ "$UPDATEAVAILABLE" = true ]
-        		then
-               	 		updateResourceFiles
+			checkSelfUpdate
+			checkResourceFiles
+			if [ "$UPDATEAVAILABLE" = true ]
+			then
+				updateResourceFiles
 				killall -9 qt-gui
 				BETACHECKTIME=0 #reset beta check timer on succes new update found
-        		fi
+			fi
 		fi
 		if [[ $BETACHECKTIME -ge 500 ]]
 		then
 			#switch to production as there is no active BETA development going on
-                	echo "Auto switching to production releases - no active BETA development going on"
-                	/qmf/bin/bxt -d :happ_usermsg -s Notification -n CreateNotification -a type -v tsc -a subType -v firewall -a text -v "TSC Productie releases geselecteerd" >/dev/null 2>&1
-		
+			echo "Auto switching to production releases - no active BETA development going on"
+			/qmf/bin/bxt -d :happ_usermsg -s Notification -n CreateNotification -a type -v tsc -a subType -v firewall -a text -v "TSC Productie releases geselecteerd" >/dev/null 2>&1
+
 			#first update resource files to production
 			RESOURCESURL="http://qutility.nl/resourcefiles"
-        		checkResourceFiles
-               		updateResourceFiles
+			checkResourceFiles
+			updateResourceFiles
 			killall -9 qt-gui
 
 			#then get the production script (this will also restart this script)
-                	SCRIPTURL="https://raw.githubusercontent.com/IgorYbema/tscSettings/master"
-                	checkSelfUpdate
+			SCRIPTURL="https://raw.githubusercontent.com/IgorYbema/tscSettings/master"
+			checkSelfUpdate
 		fi
 
 	fi
@@ -264,7 +307,10 @@ do
 					toonUpdate
 					;;
 				togglebeta)
-					toggleBeta	
+					toggleBeta
+					;;
+				toonstore)
+					toonStore
 					;;
 				*) 	
 					echo "Command not available: $line"
