@@ -1,5 +1,5 @@
 #!/bin/sh
-SCRIPTVERSION="1.8"
+SCRIPTVERSION="1.9"
 #this is the PROD release for TSC helper script
 BETA=false
 SCRIPTURL=" https://raw.githubusercontent.com/IgorYbema/tscSettings/master"
@@ -244,6 +244,7 @@ do
 		LASTUPDATECHECK=$STARTROUNDTIME
 		getVersion
 		checkResourceFiles
+		checkSelfUpdate
 		if [ "$UPDATEAVAILABLE" = true ] && [ "$NOTIFYUPDATE" = true ]
 		then
 			/qmf/bin/bxt -d :happ_usermsg -w 0 -s Notification -n CreateNotification -a type -v tsc -a subType -v update -a text -v "Er is een TSC resource file update beschikbaar. Update via TSC menu aub" >/dev/null 2>&1
