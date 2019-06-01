@@ -1,5 +1,5 @@
 #!/bin/sh
-SCRIPTVERSION="1.9"
+SCRIPTVERSION="1.91"
 #this is the PROD release for TSC helper script
 BETA=false
 SCRIPTURL=" https://raw.githubusercontent.com/IgorYbema/tscSettings/master"
@@ -229,16 +229,12 @@ toonStore() {
 echo "Starting TSC support script (version $SCRIPTVERSION)"
 echo "Allowing SSH in firewall rules INPUT table"
 iptables -I INPUT -p tcp -m tcp --dport 22 --tcp-flags SYN,RST,ACK SYN -j ACCEPT
+
 #insert wait cycle of 5 minutes on boot to make sure BXT messages can be received
-while [ `awk '{print int($1/60)}' /proc/uptime` -lt "5" ]
-do
-	echo "Waiting for toon boot"
-	sleep 30
-done
 while true
 do
 	STARTROUNDTIME=`date +%s`
-	if [[ $(( $LASTUPDATECHECK + $UPDATECHECKINTERVAL )) -lt $STARTROUNDTIME ]]
+	if [[ $(( $LASTUPDATECHECK + $UPDATECHECKINTERVAL )) -lt $STARTROUNDTIME && `awk '{print int($1/60)}' /proc/uptime` -ge "5" ]] #only start check update if toon has booted for at least 5 minutes
 	then
 		echo "Checking for updates"
 		LASTUPDATECHECK=$STARTROUNDTIME
