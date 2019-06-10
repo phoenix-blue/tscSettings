@@ -334,7 +334,7 @@ Widget {
 			anchors {
 				left: lockButton.right
 				top: lockButton.top
-				leftMargin: 20
+				leftMargin: isNxt ? 20 : 15
 			}
 
 			topClickMargin: 2
@@ -364,7 +364,7 @@ Widget {
 			anchors {
 				left: checkUpdateButton.right
 				top: checkUpdateButton.top
-				leftMargin: 20
+				leftMargin: isNxt ? 20 : 15
 			}
 
 			topClickMargin: 2
@@ -409,7 +409,7 @@ Widget {
 			anchors {
 				left: restartGuiButton.right
 				top: restartGuiButton.top
-				leftMargin: 20
+				leftMargin: isNxt ? 20 : 15
 			}
 
 			topClickMargin: 2
@@ -433,12 +433,33 @@ Widget {
 			anchors {
 				left: restorePasswordButton.right
 				top: restorePasswordButton.top
-				leftMargin: 20
+				leftMargin: isNxt ? 20 : 15
 			}
 
 			topClickMargin: 2
 			onClicked: {
 				stage.openFullscreen(app.credentialsMobileAppScreenUrl);
+			}
+		}
+
+		StandardButton {
+			id: changeTariff
+
+			text: qsTr("Change tariff")
+
+			height: 40 
+
+			visible: !app.localSettings.locked
+
+			anchors {
+				left: credentialsMobileAppButton.right
+				top: credentialsMobileAppButton.top
+				leftMargin: isNxt ? 20 : 15
+			}
+
+			topClickMargin: 2
+			onClicked: {
+				stage.openFullscreen(app.changeTariffScreenUrl);
 			}
 		}
 
