@@ -16,7 +16,7 @@ Screen {
 		if (firstShown) {
 			radioButtonList.currentIndex = globals.tsc["rotateTiles"] 
 			radioButtonList2.currentIndex = globals.tsc["rotateTilesDim"] 
-			rotateTimerLabel.inputText = globals.tsc["rotateTilesSeconds"] 
+			rotateTimerLabel.rightText = globals.tsc["rotateTilesSeconds"] 
 			firstShown=false;
 		}
 	}
@@ -24,7 +24,7 @@ Screen {
                  var myTsc = globals.tsc
                  myTsc["rotateTiles"] = radioButtonList.currentIndex
                  myTsc["rotateTilesDim"] = radioButtonList2.currentIndex
-                 myTsc["rotateTilesSeconds"] = rotateTimerLabel.inputText 
+                 myTsc["rotateTilesSeconds"] = rotateTimerLabel.rightText 
                  globals.tsc = myTsc
                  app.saveSettingsTsc();
 	}
@@ -33,7 +33,7 @@ Screen {
                 if (text) {
                         // need to check if contains only numbers (seconds)
                         if (text.match(/^[0-9]*$/)) {
-                                rotateTimerLabel.inputText = text;
+                                rotateTimerLabel.rightText = text;
                         }
                 }
         }
@@ -41,7 +41,7 @@ Screen {
 	Text {
 		id: bodyText
 
-		width: Math.round(600 * 1.28)
+		width: Math.round(650 * app.nxtScale)
 		wrapMode: Text.WordWrap
 
 		text: "Mode 1: only right bottom tile. Mode 2: Both bottom tiles. Mode 3: Rotate all tiles. Change will only be visible after previous interval elapsed."
@@ -52,7 +52,7 @@ Screen {
 
 		anchors {
 			top: parent.top
-			topMargin: isNxt ? Math.round(60 * 1.28) : 10
+			topMargin: isNxt ? Math.round(30 * 1.28) : 10
 			horizontalCenter: parent.horizontalCenter
 		}
 	}
@@ -76,6 +76,8 @@ Screen {
 			addItem("Mode 1");
 			addItem("Mode 2");
 			addItem("Mode 3");
+                        forceLayout();
+                        currentIndex = 0;
 		}
 	}
 
@@ -96,26 +98,41 @@ Screen {
 		Component.onCompleted: {
 			addItem("Disabled");
 			addItem("Enabled");
+                        forceLayout();
+                        currentIndex = 0;
 		}
 	}
 
-	EditTextLabel {
+	SingleLabel {
 		id: rotateTimerLabel
 		width: isNxt ? 600 : 350
 		height: 35
 		leftText: "Rotating interval"
-		leftTextAvailableWidth: isNxt ? 400 : 200
 
 		anchors {
 			horizontalCenter: parent.horizontalCenter
 			top: radioButtonList.bottom
-			topMargin: 10 
+			topMargin: isNxt ? 5 : 10
 		}
 
-		onClicked: {
-			qnumKeyboard.open("Tile rotation interval", rotateTimerLabel.inputText, "Seconds", "s" , updateRotateTimerLabel);
-		}
 	}
+
+        IconButton {
+                id: rotateTimerButton
+                width: 45
+                height: rotateTimerLabel.height
+                        iconSource: "qrc:/images/edit.svg"
+                        anchors {
+                        top: rotateTimerLabel.top
+                        left: rotateTimerLabel.right
+                        leftMargin: 10
+                }
+                topClickMargin: 3
+                onClicked: {
+			qnumKeyboard.open("Tile rotation interval", rotateTimerLabel.rightText, "Seconds", "s" , updateRotateTimerLabel);
+                }
+        }
+
 
 
 }

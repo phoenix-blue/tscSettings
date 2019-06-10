@@ -421,6 +421,27 @@ Widget {
 			}
 		}
 
+		StandardButton {
+			id: credentialsMobileAppButton
+
+			text: qsTr("Mobile Login")
+
+			height: 40 
+
+			visible: !app.localSettings.locked
+
+			anchors {
+				left: restorePasswordButton.right
+				top: restorePasswordButton.top
+				leftMargin: 20
+			}
+
+			topClickMargin: 2
+			onClicked: {
+				stage.openFullscreen(app.credentialsMobileAppScreenUrl);
+			}
+		}
+
 
 
 	}

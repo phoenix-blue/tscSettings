@@ -14,7 +14,7 @@ Screen {
 	onShown: {
 		if (firstShown) {
 			radioButtonList.currentIndex = globals.tsc["customToonLogo"] 
-			customToonLogoURLLabel.inputText = globals.tsc["customToonLogoURL"]
+			customToonLogoURLLabel.rightText = globals.tsc["customToonLogoURL"]
 			firstShown = false;
 		}
 	}
@@ -22,14 +22,14 @@ Screen {
 	onSaved: {
 			var myTsc = globals.tsc
 			myTsc["customToonLogo"] = radioButtonList.currentIndex
-			myTsc["customToonLogoURL"] = customToonLogoURLLabel.inputText
+			myTsc["customToonLogoURL"] = customToonLogoURLLabel.rightText
 			globals.tsc = myTsc
 			app.saveSettingsTsc();
 	}
 
 	function saveURL(text) {
 		if (text) {
-			customToonLogoURLLabel.inputText = text;	
+			customToonLogoURLLabel.rightText = text;	
 		}
 	}
 
@@ -45,23 +45,21 @@ Screen {
 		Component.onCompleted: {
 			addItem("Disabled");
 			addItem("Enabled");
+                        forceLayout();
+                        currentIndex = 0;
 		}
 	}
 	
-	EditTextLabel {
+	SingleLabel {
 		id: customToonLogoURLLabel
 		width: isNxt ? 800 : 650
 		leftText: "Icon Url:"
-		leftTextAvailableWidth: isNxt ? 125 : 100
 		anchors {
 			top: radioButtonList.bottom
 			left: parent.left
 			leftMargin: isNxt ? 60 : 50
 		}
 	
-		onClicked: {
-			qkeyboard.open("Custom logo URL", customToonLogoURLLabel.inputText, saveURL);
-		}
 	}
 	
 	IconButton {
@@ -76,7 +74,7 @@ Screen {
 		}
 		topClickMargin: 3
 		onClicked: {
-			qkeyboard.open("Custom logo URL", customToonLogoURLLabel.inputText, saveURL);
+			qkeyboard.open("Custom logo URL", customToonLogoURLLabel.rightText, saveURL);
 		}
 	}
 }
