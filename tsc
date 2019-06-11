@@ -1,5 +1,5 @@
 #!/bin/sh
-SCRIPTVERSION="1.91"
+SCRIPTVERSION="1.92"
 #this is the PROD release for TSC helper script
 BETA=false
 SCRIPTURL=" https://raw.githubusercontent.com/IgorYbema/tscSettings/master"
@@ -35,7 +35,7 @@ checkSelfUpdate() {
 			mv /usr/bin/tsc.new /usr/bin/tsc
 			chmod +x /usr/bin/tsc
 			#remove the notification - most users don't care about this
-			#/qmf/bin/bxt -d :happ_usermsg -s Notification -n CreateNotification -a type -v tsc -a subType -v notify -a text -v "Er is een nieuwe TSC support script gedownload. Script is gerestart." >/dev/null 2>&1
+			#/HCBv2/bin/bxt -d :happ_usermsg -s Notification -n CreateNotification -a type -v tsc -a subType -v notify -a text -v "Er is een nieuwe TSC support script gedownload. Script is gerestart." >/dev/null 2>&1
 			sleep 5
 			killall -9 tsc
 			exit
@@ -79,7 +79,7 @@ updateResourceFiles() {
 		mv /qmf/qml/resources-static-base.rcc /qmf/qml/resources-static-base.rcc.backup
 		mv /qmf/qml/resources-static-ebl.rcc /qmf/qml/resources-static-ebl.rcc.backup
 		/usr/bin/unzip -oq /tmp/resources-$ARCH-$VERSION.zip -d /qmf/qml
-		/qmf/bin/bxt -d :happ_usermsg -s Notification -n CreateNotification -a type -v tsc -a subType -v update -a text -v "Er is een TSC resource file update gedownload. Restart GUI aub" >/dev/null 2>&1
+		/HCBv2/bin/bxt -d :happ_usermsg -s Notification -n CreateNotification -a type -v tsc -a subType -v update -a text -v "Er is een TSC resource file update gedownload. Restart GUI aub" >/dev/null 2>&1
 	fi
 }
 
@@ -109,7 +109,7 @@ checkUpdate() {
 	checkFirmware
 	if [ "$CHECKRESULT" = false ] 
 	then
-		/qmf/bin/bxt -d :happ_usermsg -s Notification -n CreateNotification -a type -v tsc -a subType -v notify -a text -v "Er is geen TSC update gevonden" >/dev/null 2>&1
+		/HCBv2/bin/bxt -d :happ_usermsg -s Notification -n CreateNotification -a type -v tsc -a subType -v notify -a text -v "Er is geen TSC update gevonden" >/dev/null 2>&1
 	fi
 }
 
@@ -135,14 +135,14 @@ checkFirmware() {
 		rm -f /tmp/update.status.vars
 
 		CHECKRESULT=true
-		/qmf/bin/bxt -d :happ_usermsg -s Notification -n CreateNotification -a type -v tsc -a subType -v firmware -a text -v "Er is nieuwe Toon firmware ($LATESTVERSION) beschikbaar!" >/dev/null 2>&1
+		/HCBv2/bin/bxt -d :happ_usermsg -s Notification -n CreateNotification -a type -v tsc -a subType -v firmware -a text -v "Er is nieuwe Toon firmware ($LATESTVERSION) beschikbaar!" >/dev/null 2>&1
 	fi
 }
 
 flushFirewall() {
 	echo "Flushing firewall rules"
 	iptables -F
-	/qmf/bin/bxt -d :happ_usermsg -s Notification -n CreateNotification -a type -v tsc -a subType -v firewall -a text -v "Firewall regels verwijderd" >/dev/null 2>&1
+	/HCBv2/bin/bxt -d :happ_usermsg -s Notification -n CreateNotification -a type -v tsc -a subType -v firewall -a text -v "Firewall regels verwijderd" >/dev/null 2>&1
 }
 
 restoreRootPassword() {
@@ -153,7 +153,7 @@ restoreRootPassword() {
 	else
 		sed -i 's/root:[^:]*/root:FTR0zlZvsHEF2/' /etc/passwd
 	fi
-	/qmf/bin/bxt -d :happ_usermsg -s Notification -n CreateNotification -a type -v tsc -a subType -v password -a text -v "Root password restored to 'toon'" >/dev/null 2>&1
+	/HCBv2/bin/bxt -d :happ_usermsg -s Notification -n CreateNotification -a type -v tsc -a subType -v password -a text -v "Root password restored to 'toon'" >/dev/null 2>&1
 }
 
 toonUpdate() {
@@ -170,13 +170,13 @@ toggleBeta() {
 	if ($BETA)
 	then
 		echo "Switching to production releases"
-		/qmf/bin/bxt -d :happ_usermsg -s Notification -n CreateNotification -a type -v tsc -a subType -v firewall -a text -v "TSC Productie releases geselecteerd" >/dev/null 2>&1
+		/HCBv2/bin/bxt -d :happ_usermsg -s Notification -n CreateNotification -a type -v tsc -a subType -v firewall -a text -v "TSC Productie releases geselecteerd" >/dev/null 2>&1
 		#only need to change script url to production as self update will then fetch the production script and reload
 		SCRIPTURL="https://raw.githubusercontent.com/IgorYbema/tscSettings/master"
 		checkSelfUpdate
 	else
 		echo "Switching to beta releases"
-		/qmf/bin/bxt -d :happ_usermsg -s Notification -n CreateNotification -a type -v tsc -a subType -v firewall -a text -v "TSC Beta releases geselecteerd" >/dev/null 2>&1
+		/HCBv2/bin/bxt -d :happ_usermsg -s Notification -n CreateNotification -a type -v tsc -a subType -v firewall -a text -v "TSC Beta releases geselecteerd" >/dev/null 2>&1
 		#only need to change script url to beta as self update will then fetch the beta script and reload
 		SCRIPTURL="http://qutility.nl/resourcefiles/beta"
 		checkSelfUpdate
@@ -243,7 +243,7 @@ do
 		checkSelfUpdate
 		if [ "$UPDATEAVAILABLE" = true ] && [ "$NOTIFYUPDATE" = true ]
 		then
-			/qmf/bin/bxt -d :happ_usermsg -w 0 -s Notification -n CreateNotification -a type -v tsc -a subType -v update -a text -v "Er is een TSC resource file update beschikbaar. Update via TSC menu aub" >/dev/null 2>&1
+			/HCBv2/bin/bxt -d :happ_usermsg -w 0 -s Notification -n CreateNotification -a type -v tsc -a subType -v update -a text -v "Er is een TSC resource file update beschikbaar. Update via TSC menu aub" >/dev/null 2>&1
 			# only notify for available update if not already notified before. This will reset if user selects manual check
 			NOTIFYUPDATE=false
 		fi
@@ -270,7 +270,7 @@ do
 		then
 			#switch to production as there is no active BETA development going on
 			echo "Auto switching to production releases - no active BETA development going on"
-			/qmf/bin/bxt -d :happ_usermsg -s Notification -n CreateNotification -a type -v tsc -a subType -v firewall -a text -v "TSC Productie releases geselecteerd" >/dev/null 2>&1
+			/HCBv2/bin/bxt -d :happ_usermsg -s Notification -n CreateNotification -a type -v tsc -a subType -v firewall -a text -v "TSC Productie releases geselecteerd" >/dev/null 2>&1
 
 			#first update resource files to production
 			RESOURCESURL="http://qutility.nl/resourcefiles"
