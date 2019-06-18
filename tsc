@@ -1,8 +1,8 @@
 #!/bin/sh
-SCRIPTVERSION="1.92"
+SCRIPTVERSION="1.93"
 #this is the PROD release for TSC helper script
 BETA=false
-SCRIPTURL=" https://raw.githubusercontent.com/IgorYbema/tscSettings/master"
+SCRIPTURL=" https://raw.githubusercontent.com/ToonSoftwareCollective/tscSettings/master"
 RESOURCESURL="http://qutility.nl/resourcefiles"
 
 # load a sane environment
@@ -114,7 +114,7 @@ checkUpdate() {
 }
 
 checkFirmware() {
-	VERSIONS=`/usr/bin/curl -Nks "https://raw.githubusercontent.com/IgorYbema/update-rooted/master/toonversions" | /usr/bin/tr '\n\r' ' ' | /bin/grep STARTTOONVERSIONS | /bin/sed 's/.*#STARTTOONVERSIONS//' | /bin/sed 's/#ENDTOONVERSIONS.*//' | xargs`
+	VERSIONS=`/usr/bin/curl -Nks "https://raw.githubusercontent.com/ToonSoftwareCollective/update-rooted/master/toonversions" | /usr/bin/tr '\n\r' ' ' | /bin/grep STARTTOONVERSIONS | /bin/sed 's/.*#STARTTOONVERSIONS//' | /bin/sed 's/#ENDTOONVERSIONS.*//' | xargs`
 	if [ "$VERSIONS" == "" ]
 	then
 		VERSIONS="4.19.10"
@@ -159,7 +159,7 @@ restoreRootPassword() {
 toonUpdate() {
 	echo "Updating to latest Toon firmware"
 	#first always get latest update script in unattended mode
-	curl -Nks https://raw.githubusercontent.com/IgorYbema/update-rooted/master/update-rooted.sh -o /root/update-rooted.sh
+	curl -Nks https://raw.githubusercontent.com/ToonSoftwareCollective/update-rooted/master/update-rooted.sh -o /root/update-rooted.sh
 	#then run the script unattended
 	/bin/sh /root/update-rooted.sh -u > /var/log/tsc.toonupdate.log
 }
@@ -172,7 +172,7 @@ toggleBeta() {
 		echo "Switching to production releases"
 		/HCBv2/bin/bxt -d :happ_usermsg -s Notification -n CreateNotification -a type -v tsc -a subType -v firewall -a text -v "TSC Productie releases geselecteerd" >/dev/null 2>&1
 		#only need to change script url to production as self update will then fetch the production script and reload
-		SCRIPTURL="https://raw.githubusercontent.com/IgorYbema/tscSettings/master"
+		SCRIPTURL="https://raw.githubusercontent.com/ToonSoftwareCollective/tscSettings/master"
 		checkSelfUpdate
 	else
 		echo "Switching to beta releases"
@@ -279,7 +279,7 @@ do
 			killall -9 qt-gui
 
 			#then get the production script (this will also restart this script)
-			SCRIPTURL="https://raw.githubusercontent.com/IgorYbema/tscSettings/master"
+			SCRIPTURL="https://raw.githubusercontent.com/ToonSoftwareCollective/tscSettings/master"
 			checkSelfUpdate
 		fi
 
