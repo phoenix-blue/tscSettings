@@ -1,5 +1,5 @@
 #!/bin/sh
-SCRIPTVERSION="1.93"
+SCRIPTVERSION="1.96"
 #this is the PROD release for TSC helper script
 BETA=false
 SCRIPTURL=" https://raw.githubusercontent.com/ToonSoftwareCollective/tscSettings/master"
@@ -225,10 +225,30 @@ toonStore() {
 	killall -9 qt-gui
 }
 
+activateToon() {
+        #editing config_happ_scsync.xml for activation
+        sed -i 's~Standalone~Toon~g' /HCBv2/config/config_happ_scsync.xml
+        sed -i 's~<activated>0</activated>~<activated>1</activated>~g' /HCBv2/config/config_happ_scsync.xml
+        sed -i 's~<wizardDone>0</wizardDone>~<wizardDone>1</wizardDone>~g' /HCBv2/config/config_happ_scsync.xml
+        sed -i 's~<SoftwareUpdates>0</SoftwareUpdates>~<SoftwareUpdates>1</SoftwareUpdates>~g' /HCBv2/config/config_happ_scsync.xml
+        sed -i 's~<ElectricityDisplay>0</ElectricityDisplay>~<ElectricityDisplay>1</ElectricityDisplay>~g' /HCBv2/config/config_happ_scsync.xml
+        sed -i 's~<GasDisplay>0</GasDisplay>~<GasDisplay>1</GasDisplay>~g' /HCBv2/config/config_happ_scsync.xml
+        sed -i -e 's/\(<EndDate>\).*\(<\/EndDate>\)/<EndDate>-1<\/EndDate>/g' /HCBv2/config/config_happ_scsync.xml
+}
 
 echo "Starting TSC support script (version $SCRIPTVERSION)"
 echo "Allowing SSH in firewall rules INPUT table"
 iptables -I INPUT -p tcp -m tcp --dport 22 --tcp-flags SYN,RST,ACK SYN -j ACCEPT
+#fix TSC helper script download location (if necessary)
+sed -i 's/IgorYbema/ToonSoftwareCollective/' /etc/rc5.d/S99tsc.sh
+#check activation of this toon
+if grep -qe "<activated>0</activated>" /HCBv2/config/config_happ_scsync.xml
+then
+	echo "This Toon isn't activated yet. Maybe a factory reset? Activating it now..."
+	activateToon
+fi	
+#always get version and arch at startup
+getVersion
 
 #insert wait cycle of 5 minutes on boot to make sure BXT messages can be received
 while true

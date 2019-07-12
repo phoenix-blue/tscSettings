@@ -1,4 +1,5 @@
 import QtQuick 2.1
+import BxtClient 1.0
 
 import qb.base 1.0
 import qb.components 1.0
@@ -7,37 +8,6 @@ Widget {
 	id: tscSettingsFrame
 
 	property TscSettingsApp app
-
-	function updateRotateTiles() {
-		switch(globals.tsc["rotateTiles"]) {
-			case 0: rotateTilesLabel.rightText = "Disabled"; break;
-			case 1: rotateTilesLabel.rightText = "Mode 1"; break;
-			case 2: rotateTilesLabel.rightText = "Mode 2"; break;
-			case 3: rotateTilesLabel.rightText = "Mode 3"; break;
-			default: rotateTilesLabel.rightText = "unknown"; break;
-		}
-	}
-
-	function updateHideErrorSystray() {
-		hideErrorSystrayLabel.rightText = globals.tsc["hideErrorSystray"] ? "Enabled" : "Disabled";
-	}
-
-	function updateHideToonLogo() {
-		switch(globals.tsc["hideToonLogo"]) {
-			case 0: hideToonLogoLabel.rightText = "Disabled"; break;
-			case 1: hideToonLogoLabel.rightText = "Only during dim"; break;
-			case 2: hideToonLogoLabel.rightText = "Always"; break;
-			default: hideToonLogoLabel.rightText = "unknown"; break;
-		}
-	}
-
-	function updateCustomToonLogo() {
-		switch(globals.tsc["customToonLogo"]) {
-			case 0: customToonLogoLabel.rightText = "Disabled"; break;
-			case 1: customToonLogoLabel.rightText = "Enabled"; break;
-			default: customToonLogoLabel.rightText = "unknown"; break;
-		}
-	}
 
 	function validatePin(text, isFinalString) {
 		if (isFinalString) {
@@ -69,24 +39,11 @@ Widget {
 		tempSettings.locked = !tempSettings.locked
 		app.localSettings = tempSettings;
 		app.saveSettingsTsc();
-		rotateTilesButton.enabled = !app.localSettings.locked;
-		hideToonLogoButton.enabled = !app.localSettings.locked;;
-		hideErrorSystrayButton.enabled = !app.localSettings.locked;;
-		customToonLogoButton.enabled = !app.localSettings.locked;
-		toggleFeaturesButton.enabled = !app.localSettings.locked;
-		unlockButton.visible = app.localSettings.locked;
-		lockButton.visible = !app.localSettings.locked;
-		checkUpdateButton.visible = !app.localSettings.locked;
-		flushFirewallButton.visible = !app.localSettings.locked;
-		restartGuiButton.visible = !app.localSettings.locked;
-		restorePasswordButton.visible = !app.localSettings.locked;
 	}
 
 	onShown: {
-		updateRotateTiles();
-		updateHideToonLogo();
-		updateHideErrorSystray();
-		updateCustomToonLogo();
+		dhwPreheatToggle.isSwitchedOn = globals.tsc["noPreheatWhenAway"]
+		summerToggle.isSwitchedOn =  globals.tsc["summerMode"] 
 	}
 
 	anchors.fill: parent
@@ -101,180 +58,18 @@ Widget {
 			right: parent.right
 			rightMargin: Math.round(27 * 1.28)
 		}
-
-		SingleLabel {
-			id: rotateTilesLabel
+		Text {
+		id: systemButtonsText
+			text: "System functions"
 			anchors {
 				left: parent.left
-				right: rotateTilesButton.left
-				rightMargin: 8
 			}
-			leftText: qsTr("Rotate tiles")
-			rightText: ""
-
+			font {
+				pixelSize: isNxt ? 24 : 20
+				family: qfont.italic.name
+			}
+			color: colors.tileTextColor
 		}
-
-		IconButton {
-			id: rotateTilesButton
-
-			width: 45
-			height: rotateTilesLabel.height
-
-			enabled: !app.localSettings.locked
-
-			iconSource: "qrc:/images/edit.svg" 
-
-			anchors {
-				top: rotateTilesLabel.top
-				right: parent.right
-			}
-
-			topClickMargin: 3
-			onClicked: {
-				stage.openFullscreen(app.rotateTilesScreenUrl);
-			}
-		}
-
-		SingleLabel {
-			id: hideErrorSystrayLabel
-			anchors {
-				top: rotateTilesLabel.bottom
-				topMargin: Math.round(15 * app.nxtScale)
-				left: parent.left
-				right: hideErrorSystrayButton.left
-				rightMargin: 8
-			}
-			leftText: qsTr("Hide error systray icon")
-			rightText: ""
-
-		}
-
-		IconButton {
-			id: hideErrorSystrayButton
-
-			width: 45
-			height: hideErrorSystrayLabel.height
-
-			enabled: !app.localSettings.locked
-
-			iconSource: "qrc:/images/edit.svg" 
-
-			anchors {
-				top: hideErrorSystrayLabel.top
-				right: parent.right
-			}
-
-			topClickMargin: 3
-			onClicked: {
-				stage.openFullscreen(app.hideErrorSystrayScreenUrl);
-			}
-		}
-
-		SingleLabel {
-			id: hideToonLogoLabel
-			anchors {
-				top: hideErrorSystrayLabel.bottom
-				topMargin: Math.round(15 * app.nxtScale)
-				left: parent.left
-				right: hideToonLogoButton.left
-				rightMargin: 8
-			}
-			leftText: qsTr("Hide Toon logo")
-			rightText: ""
-
-		}
-
-		IconButton {
-			id: hideToonLogoButton
-
-			width: 45
-			height: hideToonLogoLabel.height
-
-			enabled: !app.localSettings.locked
-
-			iconSource: "qrc:/images/edit.svg" 
-
-			anchors {
-				top: hideToonLogoLabel.top
-				right: parent.right
-			}
-
-			topClickMargin: 3
-			onClicked: {
-				stage.openFullscreen(app.hideToonLogoScreenUrl);
-			}
-		}
-
-		SingleLabel {
-			id: customToonLogoLabel
-			anchors {
-				top: hideToonLogoButton.bottom
-				topMargin: Math.round(15 * app.nxtScale)
-				left: parent.left
-				right: hideToonLogoButton.left
-				rightMargin: 8
-			}
-			leftText: qsTr("Custom Toon logo")
-			rightText: ""
-
-		}
-
-		IconButton {
-			id: customToonLogoButton
-
-			width: 45
-			height: customToonLogoLabel.height
-
-			enabled: !app.localSettings.locked
-
-			iconSource: "qrc:/images/edit.svg"
-
-			anchors {
-				top: customToonLogoLabel.top
-				right: parent.right
-			}
-
-			topClickMargin: 3
-			onClicked: {
-				stage.openFullscreen(app.customToonLogoScreenUrl);
-			}
-		}
-
-		SingleLabel {
-			id: toggleFeaturesLabel
-			anchors {
-				top: customToonLogoButton.bottom
-				topMargin: Math.round(15 * app.nxtScale)
-				left: parent.left
-				right: hideToonLogoButton.left
-				rightMargin: 8
-			}
-			leftText: "Toggle native Toon features" 
-			rightText: ""
-
-		}
-
-		IconButton {
-			id: toggleFeaturesButton
-
-			width: 45
-			height: toggleFeaturesLabel.height
-
-			iconSource: "qrc:/images/edit.svg"
-
-			enabled: !app.localSettings.locked
-
-			anchors {
-				top: toggleFeaturesLabel.top
-				right: parent.right
-			}
-
-			topClickMargin: 3
-			onClicked: {
-				stage.openFullscreen(app.toggleFeaturesScreenUrl);
-			}
-		}
-
 
 		StandardButton {
 			id: unlockButton
@@ -287,8 +82,7 @@ Widget {
 
 			anchors {
 				left: parent.left
-				top: toggleFeaturesLabel.bottom
-				topMargin: Math.round(15 * app.nxtScale)
+				top: systemButtonsText.bottom
 			}
 
 			topClickMargin: 2
@@ -310,8 +104,7 @@ Widget {
 
 			anchors {
 				left: parent.left
-				top: toggleFeaturesLabel.bottom
-				topMargin: Math.round(15 * app.nxtScale)
+				top: systemButtonsText.bottom
 			}
 
 			topClickMargin: 2
@@ -387,7 +180,7 @@ Widget {
 
 			anchors {
 				left: parent.left
-				top: lockButton.bottom
+				top: unlockButton.bottom
 				topMargin: Math.round(15 * app.nxtScale)
 			}
 
@@ -442,6 +235,61 @@ Widget {
 			}
 		}
 
+
+		Text {
+			id: modsButtonsText 
+			text: "Modification functions"
+			anchors {
+				left: parent.left
+				top: restartGuiButton.bottom
+				topMargin: Math.round(15 * app.nxtScale)
+			}
+			font {
+				pixelSize: isNxt ? 24 : 20
+				family: qfont.italic.name
+			}
+			color: colors.tileTextColor
+		}
+
+		StandardButton {
+			id: guiModButton
+			text: "Gui modifications"
+
+			height: 40 
+
+			visible: !app.localSettings.locked
+
+			anchors {
+				left: parent.left 
+				top: modsButtonsText.bottom
+			}
+
+			topClickMargin: 3
+			onClicked: {
+				stage.openFullscreen(app.guiModScreenUrl);
+			}
+		}
+
+		StandardButton {
+			id: toggleNativeFeaturesButton
+			text: "Toon subscription features"
+
+			height: 40 
+
+			visible: !app.localSettings.locked
+
+			anchors {
+				left: guiModButton.right 
+				leftMargin: isNxt ? 20 : 15
+				top: guiModButton.top
+			}
+
+			topClickMargin: 3
+			onClicked: {
+				stage.openFullscreen(app.toggleNativeFeaturesScreenUrl);
+			}
+		}
+
 		StandardButton {
 			id: changeTariff
 
@@ -452,8 +300,8 @@ Widget {
 			visible: !app.localSettings.locked
 
 			anchors {
-				left: credentialsMobileAppButton.right
-				top: credentialsMobileAppButton.top
+				left: toggleNativeFeaturesButton.right
+				top: toggleNativeFeaturesButton.top
 				leftMargin: isNxt ? 20 : 15
 			}
 
@@ -463,9 +311,76 @@ Widget {
 			}
 		}
 
+       		Text {
+       		        id: dhwPreheatToggleText
+       		        anchors {
+       		                left: parent.left
+       		                top: guiModButton.bottom
+				topMargin: Math.round(15 * app.nxtScale)
+       		        }
+			visible: !app.localSettings.locked && globals.thermostatFeatures["FF_Dhw_PreHeat_Settings"]
+       		        font.pixelSize: 16
+       		        font.family: qfont.semiBold.name
+       		        text: "Disable hot water preheating when sleeping or away"
+       		}
+	
+       		OnOffToggle {
+       		        id: dhwPreheatToggle
+       		        height: 36
+       		        anchors {
+				left: dhwPreheatToggleText.right
+				leftMargin: isNxt ? 20 : 15
+       		        	top: dhwPreheatToggleText.top
+			}
+			visible: !app.localSettings.locked && globals.thermostatFeatures["FF_Dhw_PreHeat_Settings"]
+       		        leftIsSwitchedOn: false
+                        onIsSwitchedOnChanged: {
+                                if (isSwitchedOn !== globals.tsc["noPreheatWhenAway"]) {
+                 			var myTsc = globals.tsc
+                 			myTsc["noPreheatWhenAway"] = isSwitchedOn 
+                 			globals.tsc = myTsc
+                 			app.saveSettingsTsc();
+                                }
+                        }
+	        }
+
+
+       		Text {
+       		        id: summerToggleText
+       		        anchors {
+       		                left: parent.left
+       		                top: dhwPreheatToggleText.bottom
+				topMargin: Math.round(15 * app.nxtScale)
+       		        }
+			visible: !app.localSettings.locked
+       		        font.pixelSize: 16
+       		        font.family: qfont.semiBold.name
+       		        text: "Summer mode (lower the setpoint)"
+       		}
+	
+       		OnOffToggle {
+       		        id: summerToggle
+       		        height: 36
+       		        anchors {
+				left: dhwPreheatToggle.left
+				top: summerToggleText.top
+			}
+			visible: !app.localSettings.locked
+       		        leftIsSwitchedOn: false
+                        onIsSwitchedOnChanged: {
+                                if (isSwitchedOn !== globals.tsc["summerMode"]) {
+                                        var myTsc = globals.tsc
+                                        myTsc["summerMode"] = isSwitchedOn
+                                        globals.tsc = myTsc
+                                        app.saveSettingsTsc()
+					app.toggleSummerMode()
+                                }
+                        }
+	        }
 
 
 	}
+
 	Text {
 		id: versionText
 		text: "Versie: " + app.tscVersion
@@ -503,6 +418,18 @@ Widget {
 			}
 		}
 	}
+
+        Image {
+                id: donateImg 
+		width: isNxt ? 75 : 60
+		fillMode: Image.PreserveAspectFit
+                source: "qrc:/tsc/donate.png"
+                anchors {
+			bottom: parent.bottom
+			left: parent.left
+                }
+        }
+
 
 
 	Timer {
