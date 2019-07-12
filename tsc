@@ -2,7 +2,7 @@
 SCRIPTVERSION="1.96"
 #this is the PROD release for TSC helper script
 BETA=false
-SCRIPTURL=" https://raw.githubusercontent.com/ToonSoftwareCollective/tscSettings/master"
+SCRIPTURL="https://raw.githubusercontent.com/ToonSoftwareCollective/tscSettings/master"
 RESOURCESURL="http://qutility.nl/resourcefiles"
 
 # load a sane environment
