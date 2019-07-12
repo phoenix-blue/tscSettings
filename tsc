@@ -244,8 +244,11 @@ sed -i 's/IgorYbema/ToonSoftwareCollective/' /etc/rc5.d/S99tsc.sh
 #check activation of this toon
 if grep -qe "<activated>0</activated>" /HCBv2/config/config_happ_scsync.xml
 then
-	echo "This Toon isn't activated yet. Maybe a factory reset? Activating it now..."
+	echo "This Toon isn't activated yet. Maybe a factory reset? Activating it now and restarting necessary apps..."
 	activateToon
+	killall -9 hcb_config
+	killall -9 happ_scsync
+	killall -9 qt-gui
 fi	
 #always get version and arch at startup
 getVersion
