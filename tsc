@@ -1,5 +1,5 @@
 #!/bin/sh
-SCRIPTVERSION="1.96"
+SCRIPTVERSION="1.97"
 #this is the PROD release for TSC helper script
 BETA=false
 SCRIPTURL="https://raw.githubusercontent.com/ToonSoftwareCollective/tscSettings/master"
@@ -227,6 +227,13 @@ toonStore() {
 
 activateToon() {
         #editing config_happ_scsync.xml for activation
+	waiting=900
+	while ! grep -qe "activated" /HCBv2/config/config_happ_scsync.xml  && [ $waiting -lt 300 ]
+	do
+		echo "Waiting $waiting secs for user to press start activation button on screen..."
+		waiting=$((waiting-1))
+		sleep 1
+	done
         sed -i 's~Standalone~Toon~g' /HCBv2/config/config_happ_scsync.xml
         sed -i 's~<activated>0</activated>~<activated>1</activated>~g' /HCBv2/config/config_happ_scsync.xml
         sed -i 's~<wizardDone>0</wizardDone>~<wizardDone>1</wizardDone>~g' /HCBv2/config/config_happ_scsync.xml
@@ -239,10 +246,11 @@ activateToon() {
 echo "Starting TSC support script (version $SCRIPTVERSION)"
 echo "Allowing SSH in firewall rules INPUT table"
 iptables -I INPUT -p tcp -m tcp --dport 22 --tcp-flags SYN,RST,ACK SYN -j ACCEPT
-#fix TSC helper script download location (if necessary)
+#fix TSC helper script download location (if necessary) and reload inittab instead of reboot
 sed -i 's/IgorYbema/ToonSoftwareCollective/' /etc/rc5.d/S99tsc.sh
+sed -i 's/reboot/init q/' /etc/rc5.d/S99tsc.sh
 #check activation of this toon
-if grep -qe "<activated>0</activated>" /HCBv2/config/config_happ_scsync.xml
+if ! grep -qe "<activated>1</activated>" /HCBv2/config/config_happ_scsync.xml
 then
 	echo "This Toon isn't activated yet. Maybe a factory reset? Activating it now and restarting necessary apps..."
 	activateToon
