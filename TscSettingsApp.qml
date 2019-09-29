@@ -22,7 +22,7 @@ App {
 	property url customToonLogoScreenUrl: "CustomToonLogoScreen.qml"
         property url settingsScreenUrl: "qrc:/apps/settings/SettingsScreen.qml"
 
-	property string tscVersion: "2.0.1"
+	property string tscVersion: "2.1.0"
 
 	property real nxtScale: isNxt ? 1.5 : 1 
 	property bool rebootNeeded: false
@@ -100,7 +100,7 @@ App {
                                 }
                         }
                 }
-                settingsFile.open("GET", "file:///HCBv2/qml/config/tsc.settings", true);
+                settingsFile.open("GET", "file:///mnt/data/tsc/tscSettings.userSettings.json", true);
                 settingsFile.send();
         }
 
@@ -111,7 +111,7 @@ App {
 		for (var setting in localSettings) {
 			saveSettings[setting] = localSettings[setting];
 		}
-                saveFile.open("PUT", "file:///HCBv2/qml/config/tsc.settings");
+                saveFile.open("PUT", "file:///mnt/data/tsc/tscSettings.userSettings.json");
                 saveFile.send(JSON.stringify(saveSettings));
 	}
 
@@ -262,7 +262,7 @@ App {
                 	bxtClient.doAsyncBxtRequest(msg, toggleSummerModeCallback, 30)
 		} else {
 	                var thermstatesFile = new XMLHttpRequest()
-                	thermstatesFile.open("GET", "file:///HCBv2/qml/config/tsc.saved.thermstates", 0) //sync request
+                	thermstatesFile.open("GET", "file:///mnt/data/tsc/tscSettings.savedThermstates.json", 0) //sync request
                 	thermstatesFile.send()
                         if (thermstatesFile.responseText.length > 0)  {
                         	var thermStates = JSON.parse(thermstatesFile.responseText);
@@ -447,7 +447,7 @@ App {
 
 		                var saveFile = new XMLHttpRequest()
 				// save the current therm states
-		                saveFile.open("PUT", "file:///HCBv2/qml/config/tsc.saved.thermstates",0) // do sync request to wait for the send to complete
+		                saveFile.open("PUT", "file:///mnt/data/tsc/tscSettings.savedThermstates.json",0) // do sync request to wait for the send to complete
 		                saveFile.send(JSON.stringify(tmpThermStates))
 
 				// now it is time to lower these setpoints

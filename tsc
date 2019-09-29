@@ -1,5 +1,5 @@
 #!/bin/sh
-SCRIPTVERSION="1.97"
+SCRIPTVERSION="1.98"
 #this is the PROD release for TSC helper script
 BETA=false
 SCRIPTURL="https://raw.githubusercontent.com/ToonSoftwareCollective/tscSettings/master"
@@ -249,6 +249,20 @@ iptables -I INPUT -p tcp -m tcp --dport 22 --tcp-flags SYN,RST,ACK SYN -j ACCEPT
 #fix TSC helper script download location (if necessary) and reload inittab instead of reboot
 sed -i 's/IgorYbema/ToonSoftwareCollective/' /etc/rc5.d/S99tsc.sh
 sed -i 's/reboot/init q/' /etc/rc5.d/S99tsc.sh
+
+#move location of tscSettings save files
+mkdir -p /mnt/data/tsc
+if [ -f /HCBv2/qml/config/tsc.settings ]  && [ ! -h /HCBv2/qml/config/tsc.settings ] 
+then
+	mv /HCBv2/qml/config/tsc.settings /mnt/data/tsc/tscSettings.userSettings.json
+	ln -s /mnt/data/tsc/tscSettings.userSettings.json /HCBv2/qml/config/tsc.settings
+fi
+if [ -f /HCBv2/qml/config/tsc.saved.thermstates ] && [ ! -h /HCBv2/qml/config/tsc.saved.thermstates ]
+then
+	mv /HCBv2/qml/config/tsc.saved.thermstates /mnt/data/tsc/tscSettings.savedThermstates.json
+	ln -s /mnt/data/tsc/tscSettings.savedThermstates.json /HCBv2/qml/config/tsc.saved.thermstates
+fi
+
 #check activation of this toon
 if ! grep -qe "<activated>1</activated>" /HCBv2/config/config_happ_scsync.xml
 then
