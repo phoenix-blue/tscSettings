@@ -1,5 +1,5 @@
 #!/bin/sh
-SCRIPTVERSION="1.98"
+SCRIPTVERSION="1.99"
 #this is the PROD release for TSC helper script
 BETA=false
 SCRIPTURL="https://raw.githubusercontent.com/ToonSoftwareCollective/tscSettings/master"
@@ -228,7 +228,7 @@ toonStore() {
 activateToon() {
         #editing config_happ_scsync.xml for activation
 	waiting=900
-	while ! grep -qe "activated" /HCBv2/config/config_happ_scsync.xml  && [ $waiting -lt 300 ]
+	while ! grep -qse "activated" /HCBv2/config/config_happ_scsync.xml  && [ $waiting -gt 0 ]
 	do
 		echo "Waiting $waiting secs for user to press start activation button on screen..."
 		waiting=$((waiting-1))
