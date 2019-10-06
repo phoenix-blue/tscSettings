@@ -60,6 +60,7 @@ main ()
         #after that downloading the update script should work also
         curl -Nks https://raw.githubusercontent.com/ToonSoftwareCollective/update-rooted/master/update-rooted.sh -o /root/update-rooted.sh
 
+	#now it is time to stop running processes and set the screen to show console output
         /etc/init.d/HCBv2 stop
         # prevent restarting during upgrade
         echo 'exit' > /tmp/etc-default-HCBv2
@@ -87,7 +88,7 @@ main ()
         echo -n -e '\033[2J'> /dev/tty0
 
         #remove this startup file so it doesnt start again
-        rm /etc/rc5.d/S99dropbear-install.sh
+        rm /etc/rc5.d/S99dropbear-install-and-update.sh
         #finallly start the unconditional update and output to screen
         sh /root/update-rooted.sh -u > /dev/tty0
 }
