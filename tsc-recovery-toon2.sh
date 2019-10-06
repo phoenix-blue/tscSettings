@@ -47,7 +47,7 @@ patch_root_access()
 
 
 	userlog "Placing a dropbear-install-and-updatesscript-on-boot script"
-	cat <<EOT > /mnt/system/etc/rc5.d/S99dropbear-install-and-update.sh
+	cat <<'EOT' > /mnt/system/etc/rc5.d/S99dropbear-install-and-update.sh
 #!/bin/sh
 
 usertouch()
