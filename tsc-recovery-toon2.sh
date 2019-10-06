@@ -50,6 +50,31 @@ patch_root_access()
 	cat <<EOT > /mnt/system/etc/rc5.d/S99dropbear-install-and-update.sh
 #!/bin/sh
 
+usertouch()
+{
+        local TIMEOUT=$1
+
+        # fork an input consumer process
+        (cat /dev/input/event1 > /tmp/usertouch.txt) 2>/dev/null &
+        local TPID=$!
+
+        for i in $(seq $TIMEOUT); do
+                [ "$(stat -c %s /tmp/usertouch.txt)" = "0" ] || break
+                sleep 1
+        done
+
+        kill -9 $TPID
+
+        local SIZE=$(stat -c %s /tmp/usertouch.txt; rm -f /tmp/usertouch.txt)
+        [ "$SIZE" != "0" ]
+        return $?
+}
+
+userlog()
+{
+        echo "$@" | tee -a /dev/tty0
+}
+
 main ()
 {
         #on toon2 recovery the wifi settings will still work so eventually this while loop should work
@@ -89,8 +114,20 @@ main ()
 
         #remove this startup file so it doesnt start again
         rm /etc/rc5.d/S99dropbear-install-and-update.sh
-        #finallly start the unconditional update and output to screen
-        sh /root/update-rooted.sh -u > /dev/tty0
+
+	IP=`ip addr show dev wlan0 | grep inet |  awk '{print $2}' | cut -d\/ -f1`
+	userlog "****                   Welcome to the after-recovery TSC routine                     ****"
+	userlog "* Toon IP addres: $IP"
+	userlog "* Toon password : toon"
+	userlog "* Toon SSH      : enabled"
+	userlog "**** Touch the screen within 10 seconds to cancel the auto update to latest firmware ****"
+
+	if usertouch 10; then
+        	userlog "Canceled auto update. SSH is enabled. It is now up to you :-)"
+	else
+        	#finallly start the unconditional update and output to screen
+        	sh /root/update-rooted.sh -u > /dev/tty0
+	fi
 }
 
 main 2&>1 > /qmf/www/rsrc/log &
