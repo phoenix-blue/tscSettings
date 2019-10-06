@@ -28,7 +28,7 @@ write_image()
 
         userlog "Resizing rootfs..."
         resize2fs /dev/mmcblk3p2 || return $?
-		sync ; sync ; sync
+	sync ; sync ; sync
 }
 
 patch_root_access()
@@ -175,22 +175,28 @@ userlog()
         echo "$@" | tee -a /dev/tty0
 }
 
+#only start this part if there is no extra data is padded on the end of this script or else the toon is running a recovery update check after firmware update
+if tail -n 1 $0 | grep -q "#END TSC#"
+then
+	enableBacklight
+	userlog "Restoring toon, the TSC way! Touch the screen to start the TSC recovery procedure or wait 10 seconds to skip..."
 
-enableBacklight
-userlog "Restoring toon, the TSC way! Touch the screen to start the TSC recovery procedure or wait 10 seconds to skip..."
-
-if usertouch 10; then
-    prepare_image
-    userlog "Recovery image flashing starts"
-    if write_image; then
+	if usertouch 10
+	then
+	    prepare_image
+	    userlog "Recovery image flashing starts"
+	    if write_image
+	    then
 		patch_root_access
 		userlog "Recovery completed. Follow the one-time-boot scripts for installing dropbear and auto update on http://toon-ip/rsrc/log during toon boot"
 		userlog "Touch the screen to reboot or wait 30 seconds"
 		usertouch 30
 		reboot
-	else
+	    else
 		userlog "Writing recovery image failed!"
-    fi
-else
-    userlog "TSC recovery procedure skipped."
+    	    fi
+	else
+    		userlog "TSC recovery procedure skipped."
+	fi
 fi
+#END TSC#
