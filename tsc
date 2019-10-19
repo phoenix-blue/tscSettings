@@ -1,5 +1,5 @@
 #!/bin/sh
-SCRIPTVERSION="1.99"
+SCRIPTVERSION="2.00"
 #this is the PROD release for TSC helper script
 BETA=false
 SCRIPTURL="https://raw.githubusercontent.com/ToonSoftwareCollective/tscSettings/master"
@@ -243,9 +243,70 @@ activateToon() {
         sed -i -e 's/\(<EndDate>\).*\(<\/EndDate>\)/<EndDate>-1<\/EndDate>/g' /HCBv2/config/config_happ_scsync.xml
 }
 
+downloadNxtRecovery() {
+	mount /mnt/recovery
+	if [ ! -f /mnt/recovery/recovery.sh ] 
+	then
+		echo "Toon2 recovery script missing. Downloading it and saving it in the recovery location."
+		curl -Nks  --retry 5 --connect-timeout 2 https://raw.githubusercontent.com/ToonSoftwareCollective/tscSettings/master/tsc-recovery-toon2.sh > /mnt/recovery/recovery.sh
+		chmod +x /mnt/recovery/recovery.sh
+	fi	
+	umount /mnt/recovery
+}
+
+checkPasswdFile() {
+	if [ ! -s /etc/passwd ] 
+	then
+		if [ -s /root/passwd.backup ] && grep -q root /root/passwd.backup
+		then
+			echo "Restoring empty or lost password file from the last backup in /rooot/passwd.backup !"
+			cp /root/passwd.backup /etc/passwd
+		else
+			echo "Restoring empty or lost password file from default with root password 'toon'!"
+			echo "root:FTR0zlZvsHEF2:0:0:root:/root:/bin/sh
+daemon:*:1:1:daemon:/usr/sbin:/bin/sh
+bin:*:2:2:bin:/bin:/bin/sh
+sys:*:3:3:sys:/dev:/bin/sh
+sync:*:4:65534:sync:/bin:/bin/sync
+games:*:5:60:games:/usr/games:/bin/sh
+man:*:6:12:man:/var/cache/man:/bin/sh
+lp:*:7:7:lp:/var/spool/lpd:/bin/sh
+mail:*:8:8:mail:/var/mail:/bin/sh
+news:*:9:9:news:/var/spool/news:/bin/sh
+uucp:*:10:10:uucp:/var/spool/uucp:/bin/sh
+proxy:*:13:13:proxy:/bin:/bin/sh
+www-data:*:33:33:www-data:/var/www:/bin/sh
+backup:*:34:34:backup:/var/backups:/bin/sh
+list:*:38:38:Mailing List Manager:/var/list:/bin/sh
+irc:*:39:39:ircd:/var/run/ircd:/bin/sh
+gnats:*:41:41:Gnats Bug-Reporting System (admin):/var/lib/gnats:/bin/sh
+nobody:*:65534:65534:nobody:/nonexistent:/bin/sh" > /etc/passwd
+		fi
+	fi
+}
+
+################# main ###################
+
 echo "Starting TSC support script (version $SCRIPTVERSION)"
+#always get version and arch at startup
+getVersion
+
+#first we make sure SSH is allowed in the firewall in case something went wrong
 echo "Allowing SSH in firewall rules INPUT table"
 iptables -I INPUT -p tcp -m tcp --dport 22 --tcp-flags SYN,RST,ACK SYN -j ACCEPT
+
+#check for corrupted/empty passwd file which sometimes happens on a qb2
+if [ "$ARCH" == "qb2" ]
+then
+	checkPasswdFile
+fi
+
+#if NXt then place toon2 recovery script
+if [ "$ARCH" == "nxt" ]
+then
+	downloadNxtRecovery
+fi
+
 #fix TSC helper script download location (if necessary) and reload inittab instead of reboot
 sed -i 's/IgorYbema/ToonSoftwareCollective/' /etc/rc5.d/S99tsc.sh
 sed -i 's/reboot/init q/' /etc/rc5.d/S99tsc.sh
@@ -271,9 +332,9 @@ then
 	killall -9 hcb_config
 	killall -9 happ_scsync
 	killall -9 qt-gui
-fi	
-#always get version and arch at startup
-getVersion
+fi
+
+# main routine #
 
 #insert wait cycle of 5 minutes on boot to make sure BXT messages can be received
 while true
@@ -299,7 +360,7 @@ do
 	then
 		if [[ $(( $LASTUPDATECHECK + $BETACHECKTIME )) -lt $STARTROUNDTIME ]]
 		then
-			echo "Checking BETA"
+			echo "Checking BETA updates"
 			LASTUPDATECHECK=$STARTROUNDTIME
 			BETACHECKTIME=$(( BETACHECKTIME + ROUNDWAIT ))  # on every (failed) check the BETA time to wait increases
 			checkSelfUpdate
