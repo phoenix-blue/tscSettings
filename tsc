@@ -1,5 +1,5 @@
 #!/bin/sh
-SCRIPTVERSION="2.00"
+SCRIPTVERSION="2.01"
 #this is the PROD release for TSC helper script
 BETA=false
 SCRIPTURL="https://raw.githubusercontent.com/ToonSoftwareCollective/tscSettings/master"
@@ -81,6 +81,29 @@ updateResourceFiles() {
 		/usr/bin/unzip -oq /tmp/resources-$ARCH-$VERSION.zip -d /qmf/qml
 		/HCBv2/bin/bxt -d :happ_usermsg -s Notification -n CreateNotification -a type -v tsc -a subType -v update -a text -v "Er is een TSC resource file update gedownload. Restart GUI aub" >/dev/null 2>&1
 	fi
+}
+
+checkCApem() {
+        SHA256ONLINE=`curl -Nks https://curl.haxx.se/ca/cacert.pem.sha256 | cut -d\  -f1`
+        SHA256CURRENT=`/usr/bin/sha256sum /etc/ssl/certs/ca-certificates.crt | cut -d\  -f1`
+        if [ !  "$SHA256CURRENT" == "$SHA256ONLINE" ] && [ -n "$SHA256ONLINE" ]
+        then
+                echo "There is a new version of the Mozilla CA pem file. Downloading it!"
+                /usr/bin/curl -Nks https://curl.haxx.se/ca/cacert.pem -o /etc/ssl/certs/ca-certificates.crt.new
+                SHA256NEW=`/usr/bin/sha256sum /etc/ssl/certs/ca-certificates.crt.new | cut -d\  -f1`
+                if [ "$SHA256ONLINE" == "$SHA256NEW" ]
+                then
+                        echo "Download ok! Replacing Mozilla CA pem file!"
+                        if [ ! -f /etc/ssl/certs/ca-certificates.crt.orig ]
+                        then
+                                echo "First making a backup of the original Toon CA fileA"
+                                cp /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt.orig
+                        fi
+                        mv -f /etc/ssl/certs/ca-certificates.crt.new /etc/ssl/certs/ca-certificates.crt
+                else
+                        echo "Download failed. Trying next time."
+                fi
+        fi
 }
 
 getVersion() {
@@ -347,6 +370,7 @@ do
 		getVersion
 		checkResourceFiles
 		checkSelfUpdate
+		checkCApem
 		if [ "$UPDATEAVAILABLE" = true ] && [ "$NOTIFYUPDATE" = true ]
 		then
 			/HCBv2/bin/bxt -d :happ_usermsg -w 0 -s Notification -n CreateNotification -a type -v tsc -a subType -v update -a text -v "Er is een TSC resource file update beschikbaar. Update via TSC menu aub" >/dev/null 2>&1
@@ -365,6 +389,7 @@ do
 			BETACHECKTIME=$(( BETACHECKTIME + ROUNDWAIT ))  # on every (failed) check the BETA time to wait increases
 			checkSelfUpdate
 			checkResourceFiles
+			checkCApem
 			if [ "$UPDATEAVAILABLE" = true ]
 			then
 				updateResourceFiles
