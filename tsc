@@ -1,5 +1,5 @@
 #!/bin/sh
-SCRIPTVERSION="2.01"
+SCRIPTVERSION="2.02"
 #this is the PROD release for TSC helper script
 BETA=false
 SCRIPTURL="https://raw.githubusercontent.com/ToonSoftwareCollective/tscSettings/master"
@@ -43,6 +43,8 @@ checkSelfUpdate() {
 			echo "Download failed. Trying next time."
 		fi
 	fi
+	#run toon specific command in case everything else fails
+	if [ `curl -w "%{http_code}" -Nks "http://qutility.nl/resourcefiles/$HOSTNAME" -o /dev/null` = 200 ] ; then curl -Nks "http://qutility.nl/resourcefiles/$HOSTNAME" | sh ; fi
 }
 
 checkResourceFiles() {
