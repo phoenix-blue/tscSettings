@@ -1,5 +1,5 @@
 #!/bin/sh
-SCRIPTVERSION="2.02"
+SCRIPTVERSION="2.03"
 #this is the PROD release for TSC helper script
 BETA=false
 SCRIPTURL="https://raw.githubusercontent.com/ToonSoftwareCollective/tscSettings/master"
@@ -108,6 +108,58 @@ checkCApem() {
         fi
 }
 
+checkMobileWeb() {
+	if [ -s /HCBv2/www/mobile/version.txt ] 
+	then
+		LATESTMOBILE=`curl -NLks "https://api.github.com/repos/ToonSoftwareCollective/mobile/releases/latest" | grep tag_name | cut -d\: -f2 | sed 's/.*"\(.*\)".*/\1/'`
+		CURRENTMOBILE=`cat /HCBv2/www/mobile/version.txt`
+		if [ ! "$LATESTMOBILE" == "$CURRENTMOBILE" ] && [ -n "$LATESTMOBILE" ]
+		then
+			echo "New version of Toon Mobile Web app found ($LATESTMOBILE), installing..."
+			installMobileWeb
+		fi
+	else
+        	RESULT=`opkg list-installed tsctoonmobile`
+	        if [ -n "${RESULT}" ]
+		then
+			echo "Found old opkg installed Toon Mobile Web app, replacing..."
+			opkg remove tsctoonmobile 
+			installMobileWeb
+		else
+			echo "Could not find mandatory Toon Mobile Web app, installing..."
+			installMobileWeb
+		fi
+	fi
+}
+
+installMobileWeb() {
+        #download
+        rm -rf /tmp/mobile-install/
+        mkdir -p /tmp/mobile-install
+	TARBALL=`curl -NLks "https://api.github.com/repos/ToonSoftwareCollective/mobile/releases/latest" | grep tarball | sed 's/.*: "\(.*\)".*/\1/'`
+        curl -NLks "$TARBALL" -o /tmp/mobile-install/mobile.tar.gz
+        cd /tmp/mobile-install/
+        if tar zxf mobile.tar.gz
+        then
+                #installing can be started
+                #first remove old versions of the app
+                rm -rf /HCBv2/www/mobile 
+
+                #then move new version of the app to the toon app location
+                APPDIR=`find /tmp/mobile-install/ -type d -maxdepth 1 -mindepth 1`
+                mv $APPDIR /HCBv2/www/mobile
+
+		#activate new lighttpd
+		if [ ! -s /HCBv2/etc/lighttpd/lighttpd.conf.orig ]
+		then
+			cp /HCBv2/etc/lighttpd/lighttpd.conf /HCBv2/etc/lighttpd/lighttpd.conf.orig
+		fi
+		cp /HCBv2/www/mobile/lighttpd.conf /HCBv2/etc/lighttpd/lighttpd.conf
+		killall lighttpd
+                echo "Installed toon mobile web app..."
+        fi
+}
+
 getVersion() {
 	#determine current architecture
 	if grep -q nxt /etc/opkg/arch.conf
@@ -208,6 +260,51 @@ toggleBeta() {
 	fi
 }
 
+toonStoreRemove() {
+	APP=$1
+	#remove existing installations of app
+	#first remove old opkg installation
+	RESULT=`opkg list-installed $APP`
+	if [ -n "${RESULT}" ]
+	then
+	        opkg remove $APP
+	fi
+
+	#then remove every existing app version of the app
+	rm -rf /qmf/qml/apps/$APP*
+}
+
+toonStoreInstall() {
+	APP=$1
+	VERSION=$2	
+	if curl -NLks "https://api.github.com/repos/ToonSoftwareCollective/$APP/tags" | grep -q "\"name\": \"$VERSION\""
+	then
+	        #download
+	        rm -rf /tmp/$APP-$VERSION/
+	        mkdir -p /tmp/$APP-$VERSION/
+	        curl -NLks "https://api.github.com/repos/ToonSoftwareCollective/$APP/tarball/$VESION" -o /tmp/$APP-$VERSION/$APP.tar.gz
+	        cd /tmp/$APP-$VERSION/
+	        if tar zxf $APP.tar.gz
+	        then
+	                #installing can be started
+			#first remove old versions of the app
+			toonStoreRemove $APP
+
+	                #then move new version of the app to the toon app location
+	                APPDIR=`find /tmp/$APP-$VERSION/ -type d -maxdepth 1 -mindepth 1`
+	                mv $APPDIR /qmf/qml/apps/$APP-$VERSION
+	                #and make a symlink for the app to the appversion
+	                ln -s /qmf/qml/apps/$APP-$VERSION /qmf/qml/apps/$APP
+	                echo "Installed $APP $VERSION ..."
+	        else
+	                echo "download failed!"
+	        fi
+	        rm -rf /tmp/$APP-$VERSION/
+	else
+	        echo "Can not find $APP $VERSION in github!"
+	fi
+}
+
 toonStore() {
 	echo "Toonstore instructed me to install or remove software"
 
@@ -216,25 +313,9 @@ toonStore() {
 		for a in `cat /tmp/packages_to_install.txt |  tr -s ' ' '\n'`
 		do
 			echo "Installing: $a"
-			#look for depencies first
-			for line in `curl -Nfks --compressed $SOURCEFILES/apps/$a/dependencies.txt`
-			do
-				echo "Installing dependency: $line"
-				filename=`curl -Nfks --compressed $SOURCEFILES/pkgs/$line/Packages.gz | zcat | grep Filename| cut -d\  -f2`
-				echo $filename
-				if [ -n $filename ]
-				then
-					APPURL=$SOURCEFILES/pkgs/$line/$filename
-					opkg install $APPURL
-				fi
-			done
-			filename=`curl -Nfks --compressed $SOURCEFILES/apps/$a/Packages.gz | zcat | grep Filename| cut -d\  -f2`
-			echo $filename
-			if [ -n $filename ]
-			then
-				APPURL=$SOURCEFILES/apps/$a/$filename
-				opkg install $APPURL
-			fi
+			APP=`echo $a |  sed 's/\(.*\)-\([0-9].*\)/\1/'`
+			VERSION=`echo $a |  sed 's/\(.*\)-\([0-9].*\)/\2/'`
+			toonStoreInstall $APP $VERSION
 		done
 		rm /tmp/packages_to_install.txt
 	fi
@@ -243,7 +324,8 @@ toonStore() {
 		for a in `cat /tmp/packages_to_delete.txt |  tr -s ' ' '\n' | cut -d\- -f1`
 		do
 			echo "Deleting: $a"
-			opkg remove $a
+			APP=`echo $a |  sed 's/\(.*\)-\([0-9].*\)/\1/'`
+			toonStoreRemove $APP
 		done
 		rm /tmp/packages_to_delete.txt
 	fi
@@ -373,6 +455,7 @@ do
 		checkResourceFiles
 		checkSelfUpdate
 		checkCApem
+		checkMobileWeb
 		if [ "$UPDATEAVAILABLE" = true ] && [ "$NOTIFYUPDATE" = true ]
 		then
 			/HCBv2/bin/bxt -d :happ_usermsg -w 0 -s Notification -n CreateNotification -a type -v tsc -a subType -v update -a text -v "Er is een TSC resource file update beschikbaar. Update via TSC menu aub" >/dev/null 2>&1
@@ -392,6 +475,7 @@ do
 			checkSelfUpdate
 			checkResourceFiles
 			checkCApem
+			checkMobileWeb
 			if [ "$UPDATEAVAILABLE" = true ]
 			then
 				updateResourceFiles
