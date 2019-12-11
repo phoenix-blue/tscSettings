@@ -1,5 +1,5 @@
 #!/bin/sh
-SCRIPTVERSION="2.03"
+SCRIPTVERSION="2.04"
 #this is the PROD release for TSC helper script
 BETA=false
 SCRIPTURL="https://raw.githubusercontent.com/ToonSoftwareCollective/tscSettings/master"
@@ -440,6 +440,9 @@ then
 	killall -9 happ_scsync
 	killall -9 qt-gui
 fi
+
+#fix enforcewhitelist which happens after postrm toonstore
+sed -i 's/<enforceWhitelist>1/<enforceWhitelist>0/' /HCBv2/etc/qmf_release.xml
 
 # main routine #
 
