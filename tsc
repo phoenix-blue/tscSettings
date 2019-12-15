@@ -1,5 +1,5 @@
 #!/bin/sh
-SCRIPTVERSION="2.04"
+SCRIPTVERSION="2.05"
 #this is the PROD release for TSC helper script
 BETA=false
 SCRIPTURL="https://raw.githubusercontent.com/ToonSoftwareCollective/tscSettings/master"
@@ -302,6 +302,12 @@ toonStoreInstall() {
 	                #and make a symlink for the app to the appversion
 	                ln -s /qmf/qml/apps/$APP-$VERSION /qmf/qml/apps/$APP
 	                echo "Installed $APP $VERSION ..."
+			if [ "$APP" == "boilerstatus" ]
+			then
+				#boilerstatus needs this symlink
+				mkdir -p /HCBv2/www/boilerstatus/ 
+				ln -fs /var/volatile/tmp/boilervalues.txt /HCBv2/www/boilerstatus/boilervalues.txt
+			fi
 	        else
 	                echo "download failed!"
 	        fi
