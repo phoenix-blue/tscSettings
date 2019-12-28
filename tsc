@@ -1,5 +1,5 @@
 #!/bin/sh
-SCRIPTVERSION="2.05"
+SCRIPTVERSION="2.06"
 #this is the PROD release for TSC helper script
 BETA=false
 SCRIPTURL="https://raw.githubusercontent.com/ToonSoftwareCollective/tscSettings/master"
@@ -52,7 +52,7 @@ checkResourceFiles() {
 	VERSIONSAVAILABLE=`curl -Nks -A "$HOSTNAME:$SCRIPTVERSION" $RESOURCESURL/resource.file.versions`
 	MD5NEW=`echo "$VERSIONSAVAILABLE" | grep $ARCH | grep -F $VERSION | grep base | cut -d\, -f4`
 	MD5NOW=`/usr/bin/md5sum /qmf/qml/resources-static-base.rcc | cut -d\  -f1`
-	if [ !  "$MD5NOW" == "$MD5NEW" ] && [ -n "$MD5NEW" ]
+	if [ !  "$MD5NOW" == "$MD5NEW" ] && [ -n "$MD5NEW" ]  && [ -n "$MD5NOW" ]
 	then
 		echo "Base resource file update available!"
 		UPDATEAVAILABLE=true
@@ -60,7 +60,7 @@ checkResourceFiles() {
 
 	MD5NEW=`echo "$VERSIONSAVAILABLE" | grep $ARCH | grep -F $VERSION | grep ebl | cut -d\, -f4`
 	MD5NOW=`/usr/bin/md5sum /qmf/qml/resources-static-ebl.rcc | cut -d\  -f1`
-	if [ !  "$MD5NOW" == "$MD5NEW" ] && [ -n "$MD5NEW" ]
+	if [ !  "$MD5NOW" == "$MD5NEW" ] && [ -n "$MD5NEW" ] && [ -n "$MD5NOW" ]
 	then
 		echo "EBL resource file update available!"
 		UPDATEAVAILABLE=true
