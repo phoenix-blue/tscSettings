@@ -1,5 +1,5 @@
 #!/bin/sh
-SCRIPTVERSION="2.06"
+SCRIPTVERSION="2.07"
 #this is the PROD release for TSC helper script
 BETA=false
 SCRIPTURL="https://raw.githubusercontent.com/ToonSoftwareCollective/tscSettings/master"
@@ -373,6 +373,14 @@ downloadNxtRecovery() {
 	umount /mnt/recovery
 }
 
+checkHostsFile() {
+	#this will fix any toon with broken hosts file missing localhost (causing processes of toon not wo start properly)
+	if ! grep -q "127.0.0.1.*localhost" /etc/hosts
+	then
+		echo -e "127.0.0.1\tlocalhost.localdomain\tlocalhost\t$HOSTNAME" >> /etc/hosts
+	fi
+}
+
 checkPasswdFile() {
 	if [ ! -s /etc/passwd ] 
 	then
@@ -414,10 +422,11 @@ getVersion
 echo "Allowing SSH in firewall rules INPUT table"
 iptables -I INPUT -p tcp -m tcp --dport 22 --tcp-flags SYN,RST,ACK SYN -j ACCEPT
 
-#check for corrupted/empty passwd file which sometimes happens on a qb2
+#check for corrupted/empty passwd file and missing localhost in hosts file which sometimes happens on a qb2
 if [ "$ARCH" == "qb2" ]
 then
 	checkPasswdFile
+	checkHostsFile
 fi
 
 #if NXt then place toon2 recovery script
