@@ -344,6 +344,20 @@ toonStore() {
 	killall -9 qt-gui
 }
 
+deleteFile() {
+	echo "Delete file(s) from /mnt/data/tsc/appData"
+
+	if [ -s /tmp/files_to_delete.txt ]
+	then
+		for a in `cat /tmp/files_to_delete.txt |  tr -s ' ' '\n'`
+		do
+			echo "Deleting: /mnt/data/tsc/appData/$a"
+			rm /mnt/data/tsc/appData/$a
+		done
+		rm /tmp/files_to_delete.txt 
+	fi
+}
+
 activateToon() {
         #editing config_happ_scsync.xml for activation
 	waiting=900
@@ -472,6 +486,9 @@ then
 	ln -s /mnt/data/tsc/tscSettings.savedThermstates.json /HCBv2/qml/config/tsc.saved.thermstates
 fi
 
+#create appData folder if not already there
+mkdir -p /mnt/data/tsc/appData
+
 #check activation of this toon
 if ! grep -qe "<activated>1</activated>" /HCBv2/config/config_happ_scsync.xml
 then
@@ -567,6 +584,9 @@ do
 					;;
 				toonstore)
 					toonStore
+					;;
+				deletefile)
+					deleteFile
 					;;
 				*) 	
 					echo "Command not available: $line"
