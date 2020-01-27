@@ -1,5 +1,5 @@
 #!/bin/sh
-SCRIPTVERSION="2.08"
+SCRIPTVERSION="2.09"
 #this is the PROD release for TSC helper script
 BETA=false
 SCRIPTURL="https://raw.githubusercontent.com/ToonSoftwareCollective/tscSettings/master"
