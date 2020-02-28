@@ -1,5 +1,5 @@
 #!/bin/sh
-SCRIPTVERSION="2.09"
+SCRIPTVERSION="2.10"
 #this is the PROD release for TSC helper script
 BETA=false
 SCRIPTURL="https://raw.githubusercontent.com/ToonSoftwareCollective/tscSettings/master"
@@ -596,16 +596,10 @@ do
 		rm -f $COMMANDFILE
 	fi
 
-	# at end of round do wifi fix if NXT and wait until next round
+	# at end of round do NXT stuff
 	if [ "$ARCH" == "nxt" ]
 	then
-		if [ `/sbin/wl PM` -ne 0 ]
-		then
-			echo "Wireless PM got changed again, last time fixed $((`date +%s` - $LASTTIMEWLPM )) seconds ago"
-			/sbin/wl PM 0
-			LASTTIMEWLPM=`date +%s` 
-		fi
-		#also get extra sensor data, like humidity, on toon2
+		#get extra sensor data, like humidity, on toon2
 		getSensors
 	fi
 	WAITTIME=$(( $STARTROUNDTIME + $ROUNDWAIT - `date +%s` )) 
