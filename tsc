@@ -1,5 +1,5 @@
 #!/bin/sh
-SCRIPTVERSION="2.11"
+SCRIPTVERSION="2.12"
 #this is the PROD release for TSC helper script
 BETA=false
 SCRIPTURL="https://raw.githubusercontent.com/ToonSoftwareCollective/tscSettings/master"
@@ -352,7 +352,7 @@ postNL() {
         	PASSWORD=`cat /mnt/data/tsc/postnl.userSettings.json | sed 's/,/\n/g' |  grep Password | sed 's/.*"Password":"\(.*\)".*/\1/'`
         	if [ -n "$USERID" ] && [ -n "$PASSWORD" ] &&  [ -s /qmf/qml/apps/postnl/postnl.sh ]
         	then
-                	/bin/sh /qmf/qml/apps/postnl/postnl.sh -u $USERID -p $PASSWORD -d /tmp/postnl/
+                	/bin/sh /qmf/qml/apps/postnl/postnl.sh -u $USERID -p $PASSWORD -d /tmp/postnl
         	fi
 	fi
 }
