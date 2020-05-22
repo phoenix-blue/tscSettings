@@ -1,5 +1,5 @@
 #!/bin/sh
-SCRIPTVERSION="2.12"
+SCRIPTVERSION="2.13"
 #this is the PROD release for TSC helper script
 BETA=false
 SCRIPTURL="https://raw.githubusercontent.com/ToonSoftwareCollective/tscSettings/master"
@@ -455,8 +455,12 @@ getSensors() {
 	E=`echo "(($HUM) * $ES) / 100" | bc -l`
 
 	RH=`echo "100 * $E / $ESCUR" | bc -l`
+
+	TVOC=0 ; if [ -s /tmp/tvoc ] ; then TVOC=`cat /tmp/tvoc` ; fi	
+	ECO2=0 ; if [ -s /tmp/eco2 ] ; then ECO2=`cat /tmp/eco2 ` ; fi
+
 	mkdir -p /qmf/www/tsc/
-	printf "{\"temperature\":%.1f, \"humidity\":%.1f}\n" $CURTEMP $RH > /qmf/www/tsc/sensors
+	printf "{\"temperature\":%.1f, \"humidity\":%.1f, \"tvoc\":%d, \"eco2\":%d}\n" $CURTEMP $RH $TVOC $ECO2 > /qmf/www/tsc/sensors
 }
 
 ################# main ###################

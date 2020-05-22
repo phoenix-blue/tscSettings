@@ -337,7 +337,6 @@ App {
                 id: hdrvSensoryDiscoHandler
                 deviceType: "hdrv_sensory"
                 onDiscoReceived: {
-                        var featureAirQuality = feature.featAirQualityEnabled();
                         if (isHello) {
                                 if (devNode) {
                                         for (var device = devNode.getChild("device"); device; device = device.next) {
@@ -346,7 +345,7 @@ App {
                                                         continue;
 
                                                 var deviceUuid;
-                                                if (featureAirQuality && ~deviceType.indexOf("vocSensor"))
+                                                if (~deviceType.indexOf("vocSensor"))
                                                 {
                                                         deviceUuid = device.getAttribute("uuid");
                                                         if (deviceUuid)
