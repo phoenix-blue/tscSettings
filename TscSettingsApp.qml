@@ -22,7 +22,7 @@ App {
 	property url customToonLogoScreenUrl: "CustomToonLogoScreen.qml"
         property url settingsScreenUrl: "qrc:/apps/settings/SettingsScreen.qml"
 
-	property string tscVersion: "2.1.3"
+	property string tscVersion: "2.1.4"
 
 	property real nxtScale: isNxt ? 1.5 : 1 
 	property bool rebootNeeded: false
@@ -186,9 +186,11 @@ App {
                 var msg = bxtFactory.newBxtMessage(BxtMessage.ACTION_INVOKE, p.pwrUsageUuid, "specific1", "BaseData");
 		if (dualTariff) {
                 	msg.addArgumentXmlText("<BaseField><Type>POWER</Type><SeparateBilling>true</SeparateBilling><TariffPeak>%1</TariffPeak><TariffOffPeak>%2</TariffOffPeak></BaseField>".arg(elec).arg(elecLow));
+                	msg.addArgumentXmlText("<BaseField><Type>PRODU</Type><SeparateBilling>true</SeparateBilling><TariffPeak>%1</TariffPeak><TariffOffPeak>%2</TariffOffPeak></BaseField>".arg(elec).arg(elecLow));
 		}
 		else {
                 	msg.addArgumentXmlText("<BaseField><Type>POWER</Type><SeparateBilling>false</SeparateBilling><TariffPeak>%1</TariffPeak></BaseField>".arg(elec));
+                	msg.addArgumentXmlText("<BaseField><Type>PRODU</Type><SeparateBilling>false</SeparateBilling><TariffPeak>%1</TariffPeak></BaseField>".arg(elec));
 		}
                 msg.addArgumentXmlText("<BaseField><Type>GAS</Type><SeparateBilling>false</SeparateBilling><TariffPeak>%1</TariffPeak></BaseField>".arg(gas));
                 bxtClient.sendMsg(msg);
