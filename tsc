@@ -1,5 +1,5 @@
 #!/bin/sh
-SCRIPTVERSION="2.13"
+SCRIPTVERSION="2.14"
 #this is the PROD release for TSC helper script
 BETA=false
 SCRIPTURL="https://raw.githubusercontent.com/ToonSoftwareCollective/tscSettings/master"
@@ -382,11 +382,12 @@ activateToon() {
 	done
         sed -i 's~Standalone~Toon~g' /HCBv2/config/config_happ_scsync.xml
         sed -i 's~<activated>0</activated>~<activated>1</activated>~g' /HCBv2/config/config_happ_scsync.xml
-        sed -i 's~<wizardDone>0</wizardDone>~<wizardDone>1</wizardDone>~g' /HCBv2/config/config_happ_scsync.xml
-        sed -i 's~<SoftwareUpdates>0</SoftwareUpdates>~<SoftwareUpdates>1</SoftwareUpdates>~g' /HCBv2/config/config_happ_scsync.xml
-        sed -i 's~<ElectricityDisplay>0</ElectricityDisplay>~<ElectricityDisplay>1</ElectricityDisplay>~g' /HCBv2/config/config_happ_scsync.xml
-        sed -i 's~<GasDisplay>0</GasDisplay>~<GasDisplay>1</GasDisplay>~g' /HCBv2/config/config_happ_scsync.xml
         sed -i -e 's/\(<EndDate>\).*\(<\/EndDate>\)/<EndDate>-1<\/EndDate>/g' /HCBv2/config/config_happ_scsync.xml
+        sed -i 's~<SoftwareUpdates>0</SoftwareUpdates>~<SoftwareUpdates>1</SoftwareUpdates>~g' /HCBv2/config/config_happ_scsync.xml
+	#do not set settings below, allowing user to run the wizard after factory reset
+        #sed -i 's~<wizardDone>0</wizardDone>~<wizardDone>1</wizardDone>~g' /HCBv2/config/config_happ_scsync.xml
+        #sed -i 's~<ElectricityDisplay>0</ElectricityDisplay>~<ElectricityDisplay>1</ElectricityDisplay>~g' /HCBv2/config/config_happ_scsync.xml
+        #sed -i 's~<GasDisplay>0</GasDisplay>~<GasDisplay>1</GasDisplay>~g' /HCBv2/config/config_happ_scsync.xml
 }
 
 downloadNxtRecovery() {
