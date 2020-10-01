@@ -119,7 +119,7 @@ checkCApem() {
 	if [ "$UPDATECA" = true ] 
 	then
 		/usr/sbin/update-ca-certificates
-		/HCBv2/bin/bxt -d :happ_usermsg -s Notification -n CreateNotification -a type -v tsc -a subType -v update -a text -v "De vertrouwde webserver certificaten zijn voor u geupdate. Restart GUI aub" >/dev/null 2>&1
+		/HCBv2/bin/bxt -d :happ_usermsg -s Notification -n CreateNotification -a type -v tsc -a subType -v update -a text -v "De vertrouwde webserver certificaten zijn voor u bijgewerkt. Restart GUI aub" >/dev/null 2>&1
 	fi
 }
 
