@@ -87,6 +87,7 @@ updateResourceFiles() {
 }
 
 checkCApem() {
+	UPDATECA=false
         SHA256ONLINE=`curl -Nks https://curl.haxx.se/ca/cacert.pem.sha256 | cut -d\  -f1`
 	SHA256CURRENT='false'
 	if [ -f /usr/local/share/ca-certificates/mozilla.crt ]
@@ -102,7 +103,7 @@ checkCApem() {
                 then
                         echo "Download ok! Replacing Mozilla CA pem file!"
                         mv -f /tmp/mozilla.crt /usr/local/share/ca-certificates/mozilla.crt
-			/usr/sbin/update-ca-certificates
+			UPDATECA=true
                 else
                         echo "Download failed. Trying next time."
                 fi
@@ -113,7 +114,12 @@ checkCApem() {
 		echo "Adding intermediate Staat der Nederlanden Domein Server CA 2020 - for NLalert API"
 		/usr/bin/curl -Nks https://cert.pkioverheid.nl/DomeinServerCA2020.cer -o /tmp/DomeinServerCA2020.cer
 		openssl x509 -inform der -in /tmp/DomeinServerCA2020.cer -out /usr/local/share/ca-certificates/DomeinServerCA2020.crt
+		UPDATECA=true
+	fi
+	if [ "$UPDATECA" = true ] 
+	then
 		/usr/sbin/update-ca-certificates
+		/HCBv2/bin/bxt -d :happ_usermsg -s Notification -n CreateNotification -a type -v tsc -a subType -v update -a text -v "De vertrouwde webserver certificaten zijn voor u geupdate. Restart GUI aub" >/dev/null 2>&1
 	fi
 }
 
