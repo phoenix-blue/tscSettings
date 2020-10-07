@@ -1,5 +1,5 @@
 #!/bin/sh
-SCRIPTVERSION="2.15"
+SCRIPTVERSION="2.16"
 #this is the PROD release for TSC helper script
 BETA=false
 SCRIPTURL="https://raw.githubusercontent.com/ToonSoftwareCollective/tscSettings/master"
@@ -112,9 +112,17 @@ checkCApem() {
 	if [ ! -f /usr/local/share/ca-certificates/DomeinServerCA2020.crt ]
 	then
 		echo "Adding intermediate Staat der Nederlanden Domein Server CA 2020 - for NLalert API"
-		/usr/bin/curl -Nks https://cert.pkioverheid.nl/DomeinServerCA2020.cer -o /tmp/DomeinServerCA2020.cer
-		openssl x509 -inform der -in /tmp/DomeinServerCA2020.cer -out /usr/local/share/ca-certificates/DomeinServerCA2020.crt
-		UPDATECA=true
+		if /usr/bin/curl -Nks https://cert.pkioverheid.nl/DomeinServerCA2020.cer -o /tmp/DomeinServerCA2020.cer
+		then
+			if openssl x509 -inform der -in /tmp/DomeinServerCA2020.cer -out /usr/local/share/ca-certificates/DomeinServerCA2020.crt
+			then
+				UPDATECA=true
+			else
+				echo "Openssl DER to PEM failed for intermediate certificate. Trying next time."
+			fi
+		else
+			echo "Download failed. Trying next time."
+		fi
 	fi
 	if [ "$UPDATECA" = true ] 
 	then
