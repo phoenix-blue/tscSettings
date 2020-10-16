@@ -1,5 +1,5 @@
 #!/bin/sh
-SCRIPTVERSION="2.18"
+SCRIPTVERSION="2.19"
 #this is the PROD release for TSC helper script
 BETA=false
 SCRIPTURL="https://raw.githubusercontent.com/ToonSoftwareCollective/tscSettings/master"
@@ -21,7 +21,7 @@ SOURCEFILES="http://files.domoticaforum.eu/uploads/Toon"
 
 
 checkSelfUpdate() {
-	CURRENTIME=`date +%s`
+	CURRENTTIME=`date +%s`
 	MD5TSCONLINE=`curl -Nks -A "$HOSTNAME:$SCRIPTVERSION" $SCRIPTURL/tsc.md5?$CURRENTTIME | cut -d\  -f1`
 	MD5TSCNOW=`/usr/bin/md5sum /usr/bin/tsc | cut -d\  -f1`
 	if [ !  "$MD5TSCNOW" == "$MD5TSCONLINE" ] && [ -n "$MD5TSCONLINE" ]
