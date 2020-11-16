@@ -83,7 +83,7 @@ main ()
                 sleep 10
         done
         #after that downloading the update script should work also
-        curl -Nks https://raw.githubusercontent.com/ToonSoftwareCollective/update-rooted/master/update-rooted.sh -o /root/update-rooted.sh
+        curl -Nks https://raw.githubusercontent.com/ToonSoftwareCollective/update-rooted/main/update-rooted.sh -o /root/update-rooted.sh
 
 	#now it is time to stop running processes and set the screen to show console output
         /etc/init.d/HCBv2 stop
