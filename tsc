@@ -1,5 +1,5 @@
 #!/bin/sh
-SCRIPTVERSION="2.20"
+SCRIPTVERSION="2.21"
 #this is the PROD release for TSC helper script
 BETA=false
 SCRIPTURL="https://raw.githubusercontent.com/ToonSoftwareCollective/tscSettings/main"
@@ -312,7 +312,7 @@ toonStoreInstall() {
 	        #download
 	        rm -rf /tmp/$APP-$VERSION/
 	        mkdir -p /tmp/$APP-$VERSION/
-	        curl -NLks "https://api.github.com/repos/ToonSoftwareCollective/$APP/tarball/$VESION" -o /tmp/$APP-$VERSION/$APP.tar.gz
+	        curl -NLks "https://api.github.com/repos/ToonSoftwareCollective/$APP/tarball/$VERSION" -o /tmp/$APP-$VERSION/$APP.tar.gz
 	        cd /tmp/$APP-$VERSION/
 	        if tar zxf $APP.tar.gz
 	        then
