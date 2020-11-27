@@ -37,6 +37,8 @@ App {
 		'lockPinCode': "1234"
 	}
 
+	signal tscSignal(string appName, string appSignalParameters)
+
 	FileIO { 
 		id: startupFileIO
 	}
