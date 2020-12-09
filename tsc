@@ -1,5 +1,5 @@
 #!/bin/sh
-SCRIPTVERSION="2.22"
+SCRIPTVERSION="2.23"
 #this is the PROD release for TSC helper script
 BETA=false
 SCRIPTURL="https://raw.githubusercontent.com/ToonSoftwareCollective/tscSettings/main"
@@ -576,11 +576,9 @@ do
 		checkMobileWeb
 		if [ "$UPDATEAVAILABLE" = true ] && [ "$NOTIFYUPDATE" = true ]
 		then
-			#force update for a few days due to previous errors
-			updateResourceFiles
-			#/HCBv2/bin/bxt -d :happ_usermsg -w 0 -s Notification -n CreateNotification -a type -v tsc -a subType -v update -a text -v "Er is een TSC resource file update beschikbaar. Update via TSC menu aub" >/dev/null 2>&1
+			/HCBv2/bin/bxt -d :happ_usermsg -w 0 -s Notification -n CreateNotification -a type -v tsc -a subType -v update -a text -v "Er is een TSC resource file update beschikbaar. Update via TSC menu aub" >/dev/null 2>&1
 			# only notify for available update if not already notified before. This will reset if user selects manual check
-			#NOTIFYUPDATE=false
+			NOTIFYUPDATE=false
 		fi
 	fi
 
