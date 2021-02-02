@@ -1,5 +1,5 @@
 #!/bin/sh
-SCRIPTVERSION="2.23"
+SCRIPTVERSION="2.24"
 #this is the PROD release for TSC helper script
 BETA=false
 SCRIPTURL="https://raw.githubusercontent.com/ToonSoftwareCollective/tscSettings/main"
@@ -106,7 +106,7 @@ updateResourceFiles() {
 
 checkCApem() {
 	UPDATECA=false
-        SHA256ONLINE=`curl -Nks https://curl.haxx.se/ca/cacert.pem.sha256 | cut -d\  -f1`
+        SHA256ONLINE=`curl -Nks https://curl.se/ca/cacert.pem.sha256 | cut -d\  -f1`
 	SHA256CURRENT='false'
 	mkdir -p /usr/local/share/ca-certificates/
 	if [ -f /usr/local/share/ca-certificates/mozilla.crt ]
@@ -116,7 +116,7 @@ checkCApem() {
         if [ !  "$SHA256CURRENT" == "$SHA256ONLINE" ] && [ -n "$SHA256ONLINE" ]
         then
                 echo "There is a new version of the Mozilla CA pem file. Downloading it!"
-                /usr/bin/curl -Nks https://curl.haxx.se/ca/cacert.pem -o /tmp/mozilla.crt
+                /usr/bin/curl -Nks https://curl.se/ca/cacert.pem -o /tmp/mozilla.crt
                 SHA256NEW=`/usr/bin/sha256sum /tmp/mozilla.crt | cut -d\  -f1`
                 if [ "$SHA256ONLINE" == "$SHA256NEW" ]
                 then
