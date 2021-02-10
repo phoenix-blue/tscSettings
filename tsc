@@ -1,9 +1,9 @@
 #!/bin/sh
-SCRIPTVERSION="2.24"
+SCRIPTVERSION="2.50"
 #this is the PROD release for TSC helper script
 BETA=false
 SCRIPTURL="https://raw.githubusercontent.com/ToonSoftwareCollective/tscSettings/main"
-RESOURCESURL="http://qutility.nl/resourcefiles"
+RESOURCESURL="https://raw.githubusercontent.com/ToonSoftwareCollective/resourcefiles/master/"
 
 
 # load a sane environment
@@ -17,7 +17,6 @@ LASTTIMEWLPM=`date +%s`
 LASTUPDATECHECK=0
 COMMANDFILE=/tmp/tsc.command
 NOTIFYUPDATE=true
-SOURCEFILES="http://files.domoticaforum.eu/uploads/Toon"
 
 
 checkSelfUpdate() {
@@ -44,8 +43,6 @@ checkSelfUpdate() {
 			echo "Download failed. Trying next time."
 		fi
 	fi
-	#run toon specific command in case everything else fails
-	if [ `curl -w "%{http_code}" -Nks "http://qutility.nl/resourcefiles/$HOSTNAME" -o /dev/null` = 200 ] ; then curl -Nks "http://qutility.nl/resourcefiles/$HOSTNAME" | sh ; fi
 }
 
 checkResourceFiles() {
@@ -607,7 +604,7 @@ do
 			/HCBv2/bin/bxt -d :happ_usermsg -s Notification -n CreateNotification -a type -v tsc -a subType -v firewall -a text -v "TSC Productie releases geselecteerd" >/dev/null 2>&1
 
 			#first update resource files to production
-			RESOURCESURL="http://qutility.nl/resourcefiles"
+			RESOURCESURL="https://raw.githubusercontent.com/ToonSoftwareCollective/resourcefiles/master/"
 			checkResourceFiles
 			updateResourceFiles
 
