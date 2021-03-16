@@ -485,6 +485,7 @@ getSensors() {
 	CURTEMP=`echo "$CURTEMP/100" | bc -l`
 	HUM=`cat /sys/devices/soc0/soc/2100000.aips-bus/21f8000.i2c/i2c-3/3-0043/humidity`
 	HUM=`echo "$HUM/1000" | bc -l`
+        INTENSITY=`cat /sys/devices/soc0/soc/2100000.aips-bus/21f8000.i2c/i2c-3/3-0029/iio:device1/in_intensity_ir_raw`
 
 	SOL=`echo "(7.5*$TEMP/(237.7+$TEMP))" | bc -l`
 	SOLCUR=`echo "(7.5*$CURTEMP/(237.7+$CURTEMP))" | bc -l`
@@ -499,7 +500,8 @@ getSensors() {
 	ECO2=0 ; if [ -s /tmp/eco2 ] ; then ECO2=`cat /tmp/eco2 ` ; fi
 
 	mkdir -p /qmf/www/tsc/
-	printf "{\"temperature\":%.1f, \"humidity\":%.1f, \"tvoc\":%d, \"eco2\":%d}\n" $CURTEMP $RH $TVOC $ECO2 > /qmf/www/tsc/sensors
+        printf "{\"temperature\":%.1f, \"humidity\":%.1f, \"tvoc\":%d, \"eco2\":%d, \"intensity\":%d}\n" $CURTEMP $RH $TVOC $ECO2 $INTENSITY > /qmf/www/tsc/sensors
+
 }
 
 ################# main ###################
