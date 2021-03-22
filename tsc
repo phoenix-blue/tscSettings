@@ -1,9 +1,9 @@
 #!/bin/sh
-SCRIPTVERSION="2.51"
+SCRIPTVERSION="2.52"
 #this is the PROD release for TSC helper script
 BETA=false
 SCRIPTURL="https://raw.githubusercontent.com/ToonSoftwareCollective/tscSettings/main"
-RESOURCESURL="https://raw.githubusercontent.com/ToonSoftwareCollective/resourcefiles/master/"
+RESOURCESURL="https://raw.githubusercontent.com/ToonSoftwareCollective/resourcefiles/main"
 
 
 # load a sane environment
@@ -606,7 +606,7 @@ do
 			/HCBv2/bin/bxt -d :happ_usermsg -s Notification -n CreateNotification -a type -v tsc -a subType -v firewall -a text -v "TSC Productie releases geselecteerd" >/dev/null 2>&1
 
 			#first update resource files to production
-			RESOURCESURL="https://raw.githubusercontent.com/ToonSoftwareCollective/resourcefiles/master/"
+			RESOURCESURL="https://raw.githubusercontent.com/ToonSoftwareCollective/resourcefiles/main"
 			checkResourceFiles
 			updateResourceFiles
 
