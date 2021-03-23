@@ -1,5 +1,5 @@
 #!/bin/sh
-SCRIPTVERSION="2.52"
+SCRIPTVERSION="2.53"
 #this is the PROD release for TSC helper script
 BETA=false
 SCRIPTURL="https://raw.githubusercontent.com/ToonSoftwareCollective/tscSettings/main"
@@ -49,7 +49,7 @@ checkResourceFiles() {
 	#first check if files are there or else do an update forced
 	if [ ! -s /qmf/qml/resources-static-base.rcc ] ||  [ ! -s /qmf/qml/resources-static-ebl.rcc ] 
 	then
-		#files missing, force update
+		echo "Resource files missing! Forcing update!"
 		updateResourceFiles
 	fi
 	UPDATEAVAILABLE=false
@@ -75,7 +75,7 @@ updateResourceFiles() {
 	echo "Updating resource files!"
 
 	RESOURCEFILEURL="$RESOURCESURL/resources-$ARCH-$VERSION.zip"
-	/usr/bin/wget  $RESOURCEFILEURL -O /tmp/resources-$ARCH-$VERSION.zip -T 5 -t 2 -o /dev/null
+	/usr/bin/curl -Nks --retry 5 --connect-timeout 2 $RESOURCEFILEURL -O /tmp/resources-$ARCH-$VERSION.zip
 	RESULT=$?
 
 	if [ ! $RESULT == 0 ]
@@ -433,7 +433,7 @@ downloadNxtRecovery() {
 	if [ ! -f /mnt/recovery/recovery.sh ] 
 	then
 		echo "Toon2 recovery script missing. Downloading it and saving it in the recovery location."
-		curl -Nks  --retry 5 --connect-timeout 2 https://raw.githubusercontent.com/ToonSoftwareCollective/tscSettings/main/tsc-recovery-toon2.sh > /mnt/recovery/recovery.sh
+		/usr/bin/curl -Nks  --retry 5 --connect-timeout 2 https://raw.githubusercontent.com/ToonSoftwareCollective/tscSettings/main/tsc-recovery-toon2.sh > /mnt/recovery/recovery.sh
 		chmod +x /mnt/recovery/recovery.sh
 	fi	
 	umount /mnt/recovery
