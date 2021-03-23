@@ -1,5 +1,5 @@
 #!/bin/sh
-SCRIPTVERSION="2.54"
+SCRIPTVERSION="2.55"
 #this is the PROD release for TSC helper script
 BETA=false
 SCRIPTURL="https://raw.githubusercontent.com/ToonSoftwareCollective/tscSettings/main"
@@ -86,9 +86,9 @@ updateResourceFiles() {
 		mv /qmf/qml/resources-static-ebl.rcc /qmf/qml/resources-static-ebl.rcc.backup
 		/usr/bin/unzip -oq /tmp/resources-$ARCH-$VERSION.zip -d /qmf/qml
 		sync
-		checkResourceFiles
-		if [ "$UPDATEAVAILABLE" = true ] #update failed!
+		if [ ! -s /qmf/qml/resources-static-base.rcc ] ||  [ ! -s /qmf/qml/resources-static-ebl.rcc ] 
 		then
+			echo "Updating resource file failed during unzip! Restoring previous files."
 			rm -f /qmf/qml/resources-static-base.rcc
 			rm -f /qmf/qml/resources-static-ebl.rcc
 			mv /qmf/qml/resources-static-base.rcc.backup /qmf/qml/resources-static-base.rcc
@@ -569,8 +569,8 @@ do
 		echo "Checking for updates"
 		LASTUPDATECHECK=$STARTROUNDTIME
 		getVersion
-		checkResourceFiles
 		checkSelfUpdate
+		checkResourceFiles
 		checkCApem
 		checkMobileWeb
 		if [ "$UPDATEAVAILABLE" = true ] && [ "$NOTIFYUPDATE" = true ]
