@@ -25,13 +25,13 @@ checkSelfUpdate() {
 	MD5TSCNOW=`/usr/bin/md5sum /usr/bin/tsc | cut -d\  -f1`
 	if [ !  "$MD5TSCNOW" == "$MD5TSCONLINE" ] && [ -n "$MD5TSCONLINE" ]
 	then
-		echo "There is a new version of the TSC script available. Updating and restarting!"
+		echo "$(date '+%d/%m/%Y %H:%M:%S') There is a new version of the TSC script available. Updating and restarting!"
 		CHECKRESULT=true
 		/usr/bin/curl -Nks $SCRIPTURL/tsc -o /usr/bin/tsc.new
 		MD5TSCNOW=`/usr/bin/md5sum /usr/bin/tsc.new | cut -d\  -f1`
 		if [ "$MD5TSCNOW" == "$MD5TSCONLINE" ]
 		then
-			echo "Download ok! Replacing myself and restarting."
+			echo "$(date '+%d/%m/%Y %H:%M:%S') Download ok! Replacing myself and restarting."
 			mv /usr/bin/tsc.new /usr/bin/tsc
 			chmod +x /usr/bin/tsc
 			#remove the notification - most users don't care about this
@@ -40,7 +40,7 @@ checkSelfUpdate() {
 			killall -9 tsc
 			exit
 		else
-			echo "Download failed. Trying next time."
+			echo "$(date '+%d/%m/%Y %H:%M:%S') Download failed. Trying next time."
 		fi
 	fi
 }
@@ -49,7 +49,7 @@ checkResourceFiles() {
 	#first check if files are there or else do an update forced
 	if [ ! -s /qmf/qml/resources-static-base.rcc ] ||  [ ! -s /qmf/qml/resources-static-ebl.rcc ] 
 	then
-		echo "Resource files missing! Forcing update!"
+		echo "$(date '+%d/%m/%Y %H:%M:%S') Resource files missing! Forcing update!"
 		updateResourceFiles
 	fi
 	UPDATEAVAILABLE=false
@@ -58,7 +58,7 @@ checkResourceFiles() {
 	MD5NOW=`/usr/bin/md5sum /qmf/qml/resources-static-base.rcc | cut -d\  -f1`
 	if [ !  "$MD5NOW" == "$MD5NEW" ] && [ -n "$MD5NEW" ]  && [ -n "$MD5NOW" ]
 	then
-		echo "Base resource file update available!"
+		echo "$(date '+%d/%m/%Y %H:%M:%S') Base resource file update available!"
 		UPDATEAVAILABLE=true
 	fi
 
@@ -66,13 +66,13 @@ checkResourceFiles() {
 	MD5NOW=`/usr/bin/md5sum /qmf/qml/resources-static-ebl.rcc | cut -d\  -f1`
 	if [ !  "$MD5NOW" == "$MD5NEW" ] && [ -n "$MD5NEW" ] && [ -n "$MD5NOW" ]
 	then
-		echo "EBL resource file update available!"
+		echo "$(date '+%d/%m/%Y %H:%M:%S') EBL resource file update available!"
 		UPDATEAVAILABLE=true
 	fi
 }
 
 updateResourceFiles() {
-	echo "Updating resource files!"
+	echo "$(date '+%d/%m/%Y %H:%M:%S') Updating resource files!"
 
 	RESOURCEFILEURL="$RESOURCESURL/resources-$ARCH-$VERSION.zip"
 	/usr/bin/curl -Nks --retry 5 --connect-timeout 2 $RESOURCEFILEURL -o /tmp/resources-$ARCH-$VERSION.zip
@@ -80,7 +80,7 @@ updateResourceFiles() {
 
 	if [ ! $RESULT == 0 ]
 	then
-		echo "Could not download new resources.rcc file for this version!" 
+		echo "$(date '+%d/%m/%Y %H:%M:%S') Could not download new resources.rcc file for this version!" 
 	else
 		mv /qmf/qml/resources-static-base.rcc /qmf/qml/resources-static-base.rcc.backup
 		mv /qmf/qml/resources-static-ebl.rcc /qmf/qml/resources-static-ebl.rcc.backup
@@ -88,7 +88,7 @@ updateResourceFiles() {
 		sync
 		if [ ! -s /qmf/qml/resources-static-base.rcc ] ||  [ ! -s /qmf/qml/resources-static-ebl.rcc ] 
 		then
-			echo "Updating resource file failed during unzip! Restoring previous files."
+			echo "$(date '+%d/%m/%Y %H:%M:%S') Updating resource file failed during unzip! Restoring previous files."
 			rm -f /qmf/qml/resources-static-base.rcc
 			rm -f /qmf/qml/resources-static-ebl.rcc
 			mv /qmf/qml/resources-static-base.rcc.backup /qmf/qml/resources-static-base.rcc
@@ -112,32 +112,32 @@ checkCApem() {
 	fi
         if [ !  "$SHA256CURRENT" == "$SHA256ONLINE" ] && [ -n "$SHA256ONLINE" ]
         then
-                echo "There is a new version of the Mozilla CA pem file. Downloading it!"
+                echo "$(date '+%d/%m/%Y %H:%M:%S') There is a new version of the Mozilla CA pem file. Downloading it!"
                 /usr/bin/curl -Nks https://curl.se/ca/cacert.pem -o /tmp/mozilla.crt
                 SHA256NEW=`/usr/bin/sha256sum /tmp/mozilla.crt | cut -d\  -f1`
                 if [ "$SHA256ONLINE" == "$SHA256NEW" ]
                 then
-                        echo "Download ok! Replacing Mozilla CA pem file!"
+                        echo "$(date '+%d/%m/%Y %H:%M:%S') Download ok! Replacing Mozilla CA pem file!"
                         mv -f /tmp/mozilla.crt /usr/local/share/ca-certificates/mozilla.crt
 			UPDATECA=true
                 else
-                        echo "Download failed. Trying next time."
+                        echo "$(date '+%d/%m/%Y %H:%M:%S') Download failed. Trying next time."
                 fi
         fi
 
 	if [ ! -f /usr/local/share/ca-certificates/DomeinServerCA2020.crt ]
 	then
-		echo "Adding intermediate Staat der Nederlanden Domein Server CA 2020 - for NLalert API"
+		echo "$(date '+%d/%m/%Y %H:%M:%S') Adding intermediate Staat der Nederlanden Domein Server CA 2020 - for NLalert API"
 		if /usr/bin/curl -Nks https://cert.pkioverheid.nl/DomeinServerCA2020.cer -o /tmp/DomeinServerCA2020.cer
 		then
 			if openssl x509 -inform der -in /tmp/DomeinServerCA2020.cer -out /usr/local/share/ca-certificates/DomeinServerCA2020.crt
 			then
 				UPDATECA=true
 			else
-				echo "Openssl DER to PEM failed for intermediate certificate. Trying next time."
+				echo "$(date '+%d/%m/%Y %H:%M:%S') Openssl DER to PEM failed for intermediate certificate. Trying next time."
 			fi
 		else
-			echo "Download failed. Trying next time."
+			echo "$(date '+%d/%m/%Y %H:%M:%S') Download failed. Trying next time."
 		fi
 	fi
 	if [ "$UPDATECA" = true ] 
@@ -154,18 +154,18 @@ checkMobileWeb() {
 		CURRENTMOBILE=`cat /HCBv2/www/mobile/version.txt`
 		if [ ! "$LATESTMOBILE" == "$CURRENTMOBILE" ] && [ -n "$LATESTMOBILE" ]
 		then
-			echo "New version of Toon Mobile Web app found ($LATESTMOBILE), installing..."
+			echo "$(date '+%d/%m/%Y %H:%M:%S') New version of Toon Mobile Web app found ($LATESTMOBILE), installing..."
 			installMobileWeb
 		fi
 	else
         	RESULT=`opkg list-installed tsctoonmobile`
 	        if [ -n "${RESULT}" ]
 		then
-			echo "Found old opkg installed Toon Mobile Web app, replacing..."
+			echo "$(date '+%d/%m/%Y %H:%M:%S') Found old opkg installed Toon Mobile Web app, replacing..."
 			opkg remove tsctoonmobile 
 			installMobileWeb
 		else
-			echo "Could not find mandatory Toon Mobile Web app, installing..."
+			echo "$(date '+%d/%m/%Y %H:%M:%S') Could not find mandatory Toon Mobile Web app, installing..."
 			installMobileWeb
 		fi
 	fi
@@ -195,7 +195,7 @@ installMobileWeb() {
 		fi
 		cp /HCBv2/www/mobile/lighttpd.conf /HCBv2/etc/lighttpd/lighttpd.conf
 		killall lighttpd
-                echo "Installed toon mobile web app..."
+                echo "$(date '+%d/%m/%Y %H:%M:%S') Installed toon mobile web app..."
         fi
 }
 
@@ -208,7 +208,7 @@ getVersion() {
 		ARCH="qb2"
 	fi
 	VERSION=`opkg list-installed base-$ARCH-\* | sed -r -e "s/base-$ARCH-([a-z]{3})\s-\s([0-9]*\.[0-9]*\.[0-9]*)-.*/\2/"`
-	echo "Running $VERSION on a $ARCH"
+	echo "$(date '+%d/%m/%Y %H:%M:%S') Running $VERSION on a $ARCH"
 }
 
 checkUpdate() {
@@ -256,13 +256,13 @@ checkFirmware() {
 }
 
 flushFirewall() {
-	echo "Flushing firewall rules"
+	echo "$(date '+%d/%m/%Y %H:%M:%S') Flushing firewall rules"
 	iptables -F
 	/HCBv2/bin/bxt -d :happ_usermsg -s Notification -n CreateNotification -a type -v tsc -a subType -v firewall -a text -v "Firewall regels verwijderd" >/dev/null 2>&1
 }
 
 restoreRootPassword() {
-	echo "Restoring root password to 'toon'"
+	echo "$(date '+%d/%m/%Y %H:%M:%S') Restoring root password to 'toon'"
 	if [ "$ARCH" == "nxt" ]
 	then
 		sed -i 's/root:[^:]*/root:FTR0zlZvsHEF2/' /etc/shadow
@@ -273,7 +273,7 @@ restoreRootPassword() {
 }
 
 toonUpdate() {
-	echo "Updating to latest Toon firmware"
+	echo "$(date '+%d/%m/%Y %H:%M:%S') Updating to latest Toon firmware"
 	#first always get latest update script in unattended mode
 	curl -Nks https://raw.githubusercontent.com/ToonSoftwareCollective/update-rooted/main/update-rooted.sh -o /root/update-rooted.sh
 	#then run the script unattended
@@ -285,13 +285,13 @@ toggleBeta() {
 	rm -f $COMMANDFILE
 	if ($BETA)
 	then
-		echo "Switching to production releases"
+		echo "$(date '+%d/%m/%Y %H:%M:%S') Switching to production releases"
 		/HCBv2/bin/bxt -d :happ_usermsg -s Notification -n CreateNotification -a type -v tsc -a subType -v firewall -a text -v "TSC Productie releases geselecteerd" >/dev/null 2>&1
 		#only need to change script url to production as self update will then fetch the production script and reload
 		SCRIPTURL="https://raw.githubusercontent.com/ToonSoftwareCollective/tscSettings/main"
 		checkSelfUpdate
 	else
-		echo "Switching to beta releases"
+		echo "$(date '+%d/%m/%Y %H:%M:%S') Switching to beta releases"
 		/HCBv2/bin/bxt -d :happ_usermsg -s Notification -n CreateNotification -a type -v tsc -a subType -v firewall -a text -v "TSC Beta releases geselecteerd" >/dev/null 2>&1
 		#only need to change script url to beta as self update will then fetch the beta script and reload
 		SCRIPTURL="http://qutility.nl/resourcefiles/beta"
@@ -340,30 +340,37 @@ toonStoreInstall() {
 	                mv $APPDIR /qmf/qml/apps/$APP-$VERSION
 	                #and make a symlink for the app to the appversion
 	                ln -s /qmf/qml/apps/$APP-$VERSION /qmf/qml/apps/$APP
-	                echo "Installed $APP $VERSION ..."
+	                echo "$(date '+%d/%m/%Y %H:%M:%S') Installed $APP $VERSION ..."
 			if [ "$APP" == "boilerstatus" ]
 			then
 				#boilerstatus needs this symlink
 				mkdir -p /HCBv2/www/boilerstatus/ 
 				ln -fs /var/volatile/tmp/boilervalues.txt /HCBv2/www/boilerstatus/boilervalues.txt
 			fi
+			if [ "$APP" == "wastecollection" ]
+			then
+				AFVALVERWERKER=`cat /mnt/data/tsc/wastecollection.userSettings.json | sed 's/,/\n/g' |  grep Afvalverwerker | sed 's/.*"Afvalverwerker":"\(.*\)".*/\1/'`
+				echo "$(date '+%d/%m/%Y %H:%M:%S') Downloading script for afvalverwerker $AFVALVERWERKER"
+	        		curl -NLks "https://raw.githubusercontent.com/ToonSoftwareCollective/wastecollection_plugins/main/wastecollectionProvider_$AFVALVERWERKER.js" -o /qmf/qml/apps/wastecollection/wastecollectionProvider.js
+			fi
+
 	        else
-	                echo "download failed!"
+	                echo "$(date '+%d/%m/%Y %H:%M:%S') download failed!"
 	        fi
 	        rm -rf /tmp/$APP-$VERSION/
 	else
-	        echo "Can not find $APP $VERSION in github!"
+	        echo "$(date '+%d/%m/%Y %H:%M:%S') Can not find $APP $VERSION in github!"
 	fi
 }
 
 toonStore() {
-	echo "Toonstore instructed me to install or remove software"
+	echo "$(date '+%d/%m/%Y %H:%M:%S') Toonstore instructed me to install or remove software"
 
 	if [ -s /tmp/packages_to_install.txt ]
 	then
 		for a in `cat /tmp/packages_to_install.txt |  tr -s ' ' '\n'`
 		do
-			echo "Installing: $a"
+			echo "$(date '+%d/%m/%Y %H:%M:%S') Installing: $a"
 			APP=`echo $a |  sed 's/\(.*\)-\([0-9].*\)/\1/'`
 			VERSION=`echo $a |  sed 's/\(.*\)-\([0-9].*\)/\2/'`
 			toonStoreInstall $APP $VERSION
@@ -374,7 +381,7 @@ toonStore() {
 	then
 		for a in `cat /tmp/packages_to_delete.txt |  tr -s ' ' '\n' | cut -d\- -f1`
 		do
-			echo "Deleting: $a"
+			echo "$(date '+%d/%m/%Y %H:%M:%S') Deleting: $a"
 			APP=`echo $a |  sed 's/\(.*\)-\([0-9].*\)/\1/'`
 			toonStoreRemove $APP
 		done
@@ -396,13 +403,13 @@ postNL() {
 }
 
 deleteFile() {
-	echo "Delete file(s) from /mnt/data/tsc/appData"
+	echo "$(date '+%d/%m/%Y %H:%M:%S') Delete file(s) from /mnt/data/tsc/appData"
 
 	if [ -s /tmp/files_to_delete.txt ]
 	then
 		for a in `cat /tmp/files_to_delete.txt |  tr -s ' ' '\n'`
 		do
-			echo "Deleting: /mnt/data/tsc/appData/$a"
+			echo "$(date '+%d/%m/%Y %H:%M:%S') Deleting: /mnt/data/tsc/appData/$a"
 			rm /mnt/data/tsc/appData/$a
 		done
 		rm /tmp/files_to_delete.txt 
@@ -414,7 +421,7 @@ activateToon() {
 	waiting=900
 	while ! grep -qse "activated" /HCBv2/config/config_happ_scsync.xml  && [ $waiting -gt 0 ]
 	do
-		echo "Waiting $waiting secs for user to press start activation button on screen..."
+		echo "$(date '+%d/%m/%Y %H:%M:%S') Waiting $waiting secs for user to press start activation button on screen..."
 		waiting=$((waiting-1))
 		sleep 1
 	done
@@ -432,7 +439,7 @@ downloadNxtRecovery() {
 	mount /mnt/recovery
 	if [ ! -f /mnt/recovery/recovery.sh ] 
 	then
-		echo "Toon2 recovery script missing. Downloading it and saving it in the recovery location."
+		echo "$(date '+%d/%m/%Y %H:%M:%S') Toon2 recovery script missing. Downloading it and saving it in the recovery location."
 		/usr/bin/curl -Nks  --retry 5 --connect-timeout 2 https://raw.githubusercontent.com/ToonSoftwareCollective/tscSettings/main/tsc-recovery-toon2.sh > /mnt/recovery/recovery.sh
 		chmod +x /mnt/recovery/recovery.sh
 	fi	
@@ -452,10 +459,10 @@ checkPasswdFile() {
 	then
 		if [ -s /root/passwd.backup ] && grep -q root /root/passwd.backup
 		then
-			echo "Restoring empty or lost password file from the last backup in /rooot/passwd.backup !"
+			echo "$(date '+%d/%m/%Y %H:%M:%S') Restoring empty or lost password file from the last backup in /rooot/passwd.backup !"
 			cp /root/passwd.backup /etc/passwd
 		else
-			echo "Restoring empty or lost password file from default with root password 'toon'!"
+			echo "$(date '+%d/%m/%Y %H:%M:%S') Restoring empty or lost password file from default with root password 'toon'!"
 			echo "root:FTR0zlZvsHEF2:0:0:root:/root:/bin/sh
 daemon:*:1:1:daemon:/usr/sbin:/bin/sh
 bin:*:2:2:bin:/bin:/bin/sh
@@ -511,7 +518,7 @@ echo "Starting TSC support script (version $SCRIPTVERSION)"
 getVersion
 
 #first we make sure SSH is allowed in the firewall in case something went wrong
-echo "Allowing SSH in firewall rules INPUT table"
+echo "$(date '+%d/%m/%Y %H:%M:%S') Allowing SSH in firewall rules INPUT table"
 iptables -I INPUT -p tcp -m tcp --dport 22 --tcp-flags SYN,RST,ACK SYN -j ACCEPT
 
 #check for corrupted/empty passwd file and missing localhost in hosts file which sometimes happens on a qb2
@@ -550,7 +557,7 @@ mkdir -p /mnt/data/tsc/appData
 #check activation of this toon
 if ! grep -qe "<activated>1</activated>" /HCBv2/config/config_happ_scsync.xml
 then
-	echo "This Toon isn't activated yet. Maybe a factory reset? Activating it now and restarting necessary apps..."
+	echo "$(date '+%d/%m/%Y %H:%M:%S') This Toon isn't activated yet. Maybe a factory reset? Activating it now and restarting necessary apps..."
 	activateToon
 	killall -9 hcb_config
 	killall -9 happ_scsync
@@ -566,7 +573,7 @@ do
 	STARTROUNDTIME=`date +%s`
 	if [[ $(( $LASTUPDATECHECK + $UPDATECHECKINTERVAL )) -lt $STARTROUNDTIME && `awk '{print int($1/60)}' /proc/uptime` -ge "5" ]] #only start check update if toon has booted for at least 5 minutes
 	then
-		echo "Checking for updates"
+		echo "$(date '+%d/%m/%Y %H:%M:%S') Checking for updates"
 		LASTUPDATECHECK=$STARTROUNDTIME
 		getVersion
 		checkSelfUpdate
@@ -586,7 +593,7 @@ do
 	then
 		if [[ $(( $LASTUPDATECHECK + $BETACHECKTIME )) -lt $STARTROUNDTIME ]]
 		then
-			echo "Checking BETA updates"
+			echo "$(date '+%d/%m/%Y %H:%M:%S') Checking BETA updates"
 			LASTUPDATECHECK=$STARTROUNDTIME
 			BETACHECKTIME=$(( BETACHECKTIME + ROUNDWAIT ))  # on every (failed) check the BETA time to wait increases
 			checkSelfUpdate
@@ -602,7 +609,7 @@ do
 		if [[ $BETACHECKTIME -ge 500 ]]
 		then
 			#switch to production as there is no active BETA development going on
-			echo "Auto switching to production releases - no active BETA development going on"
+			echo "$(date '+%d/%m/%Y %H:%M:%S') Auto switching to production releases - no active BETA development going on"
 			/HCBv2/bin/bxt -d :happ_usermsg -s Notification -n CreateNotification -a type -v tsc -a subType -v firewall -a text -v "TSC Productie releases geselecteerd" >/dev/null 2>&1
 
 			#first update resource files to production
@@ -620,7 +627,7 @@ do
 	if [ -s $COMMANDFILE ]
 	then
 		while IFS='' read -r line || [[ -n "$line" ]]; do
-			echo "Command received: $line"
+			echo "$(date '+%d/%m/%Y %H:%M:%S') Command received: $line"
 			case $line in
 				flushfirewall)
 					flushFirewall
@@ -648,7 +655,7 @@ do
 					deleteFile
 					;;
 				*) 	
-					echo "Command not available: $line"
+					echo "$(date '+%d/%m/%Y %H:%M:%S') Command not available: $line"
 					;;	
 			esac
 		done < "$COMMANDFILE"
