@@ -350,6 +350,10 @@ toonStoreInstall() {
 			if [ "$APP" == "wastecollection" ]
 			then
 				AFVALVERWERKER=`cat /mnt/data/tsc/wastecollection.userSettings.json | sed 's/,/\n/g' |  grep Afvalverwerker | sed 's/.*"Afvalverwerker":"\(.*\)".*/\1/'`
+				if [ "$AFVALVERWERKER" == "" ]
+				then
+					AFVALVERWERKER="1"
+				fi
 				echo "$(date '+%d/%m/%Y %H:%M:%S') Downloading script for afvalverwerker $AFVALVERWERKER"
 	        		curl -NLks "https://raw.githubusercontent.com/ToonSoftwareCollective/wastecollection_plugins/main/wastecollectionProvider_$AFVALVERWERKER.js" -o /qmf/qml/apps/wastecollection/wastecollectionProvider.js
 			fi
