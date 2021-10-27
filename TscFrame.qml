@@ -419,18 +419,6 @@ Widget {
 		}
 	}
 
-        Image {
-                id: donateImg 
-		width: isNxt ? 75 : 60
-		fillMode: Image.PreserveAspectFit
-                source: "qrc:/tsc/donate.png"
-                anchors {
-			bottom: parent.bottom
-			left: parent.left
-                }
-        }
-
-
 
 	Timer {
 		id: disableButtonTimer
