@@ -1,5 +1,5 @@
 #!/bin/sh
-SCRIPTVERSION="2.56"
+SCRIPTVERSION="2.57"
 #this is the PROD release for TSC helper script
 BETA=false
 SCRIPTURL="https://raw.githubusercontent.com/ToonSoftwareCollective/tscSettings/main"
@@ -187,6 +187,12 @@ installMobileWeb() {
                 #then move new version of the app to the toon app location
                 APPDIR=`find /tmp/mobile-install/ -type d -maxdepth 1 -mindepth 1`
                 mv $APPDIR /HCBv2/www/mobile
+
+		#create symlink to event xml
+		if [ ! -L /qmf/www/mobile/config_happ_eventmgr.txt ]
+		then
+			ln -s /qmf/config/config_happ_eventmgr.xml  /qmf/www/mobile/config_happ_eventmgr.txt
+		fi
 
 		#activate new lighttpd
 		if [ ! -s /HCBv2/etc/lighttpd/lighttpd.conf.orig ]
