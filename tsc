@@ -360,8 +360,14 @@ toonStoreInstall() {
 				then
 					AFVALVERWERKER="1"
 				fi
-				echo "$(date '+%d/%m/%Y %H:%M:%S') Downloading script for afvalverwerker $AFVALVERWERKER"
-	        		curl -NLks "https://raw.githubusercontent.com/ToonSoftwareCollective/wastecollection_plugins/main/wastecollectionProvider_$AFVALVERWERKER.js" -o /qmf/qml/apps/wastecollection/wastecollectionProvider.js
+				SCRIPTSEXISTS=`curl -o /dev/null --silent -Iw "%{http_code}" "https://raw.githubusercontent.com/ToonSoftwareCollective/wastecollection_plugins/main/wastecollectionProvider_$AFVALVERWERKER.js"` 
+				if [ "$SCRIPTSEXISTS" == "200" ]
+				then
+		        		curl -NLks "https://raw.githubusercontent.com/ToonSoftwareCollective/wastecollection_plugins/main/wastecollectionProvider_$AFVALVERWERKER.js" -o /qmf/qml/apps/wastecollection/wastecollectionProvider.js
+					echo "$(date '+%d/%m/%Y %H:%M:%S') Downloading script for afvalverwerker $AFVALVERWERKER"
+				else
+					echo "$(date '+%d/%m/%Y %H:%M:%S') Downloading script for afvalverwerker $AFVALVERWERKER failed"
+				fi
 			fi
 
 	        else
