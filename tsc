@@ -1,5 +1,5 @@
 #!/bin/sh
-SCRIPTVERSION="2.57"
+SCRIPTVERSION="2.58"
 #this is the PROD release for TSC helper script
 BETA=false
 SCRIPTURL="https://raw.githubusercontent.com/ToonSoftwareCollective/tscSettings/main"
@@ -75,7 +75,7 @@ updateResourceFiles() {
 	echo "$(date '+%d/%m/%Y %H:%M:%S') Updating resource files!"
 
 	RESOURCEFILEURL="$RESOURCESURL/resources-$ARCH-$VERSION.zip"
-	/usr/bin/curl -Nks --retry 5 --connect-timeout 2 $RESOURCEFILEURL -o /tmp/resources-$ARCH-$VERSION.zip
+	/usr/bin/curl -fNLks --retry 5 --connect-timeout 2 $RESOURCEFILEURL -o /tmp/resources-$ARCH-$VERSION.zip
 	RESULT=$?
 
 	if [ ! $RESULT == 0 ]
@@ -360,11 +360,12 @@ toonStoreInstall() {
 				then
 					AFVALVERWERKER="1"
 				fi
-				SCRIPTSEXISTS=`curl -o /dev/null --silent -Iw "%{http_code}" "https://raw.githubusercontent.com/ToonSoftwareCollective/wastecollection_plugins/main/wastecollectionProvider_$AFVALVERWERKER.js"` 
-				if [ "$SCRIPTSEXISTS" == "200" ]
+		        	curl -fNLks --retry 5 --connect-timeout 2 "https://raw.githubusercontent.com/ToonSoftwareCollective/wastecollection_plugins/main/wastecollectionProvider_$AFVALVERWERKER.js" -o /tmp/wastecollectionProvider.js
+				RESULT=$?
+				if [ $RESULT == 0 ]
 				then
-		        		curl -NLks "https://raw.githubusercontent.com/ToonSoftwareCollective/wastecollection_plugins/main/wastecollectionProvider_$AFVALVERWERKER.js" -o /qmf/qml/apps/wastecollection/wastecollectionProvider.js
 					echo "$(date '+%d/%m/%Y %H:%M:%S') Downloading script for afvalverwerker $AFVALVERWERKER"
+					mv /tmp/wastecollectionProvider.js /qmf/qml/apps/wastecollection/wastecollectionProvider.js
 				else
 					echo "$(date '+%d/%m/%Y %H:%M:%S') Downloading script for afvalverwerker $AFVALVERWERKER failed"
 				fi
