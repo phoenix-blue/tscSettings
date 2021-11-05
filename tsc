@@ -1,5 +1,5 @@
 #!/bin/sh
-SCRIPTVERSION="2.58"
+SCRIPTVERSION="2.59"
 #this is the PROD release for TSC helper script
 BETA=false
 SCRIPTURL="https://raw.githubusercontent.com/ToonSoftwareCollective/tscSettings/main"
@@ -152,7 +152,7 @@ checkMobileWeb() {
 	then
 		LATESTMOBILE=`curl -NLks "https://api.github.com/repos/ToonSoftwareCollective/mobile/releases/latest" | grep tag_name | cut -d\: -f2 | sed 's/.*"\(.*\)".*/\1/'`
 		CURRENTMOBILE=`cat /HCBv2/www/mobile/version.txt`
-		if [ ! "$LATESTMOBILE" == "$CURRENTMOBILE" ] && [ -n "$LATESTMOBILE" ]
+		if [ ! "$CURRENTMOBILE" == "0" ] && [ ! "$LATESTMOBILE" == "$CURRENTMOBILE" ] && [ -n "$LATESTMOBILE" ]
 		then
 			echo "$(date '+%d/%m/%Y %H:%M:%S') New version of Toon Mobile Web app found ($LATESTMOBILE), installing..."
 			installMobileWeb
