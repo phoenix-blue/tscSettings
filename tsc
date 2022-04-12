@@ -1,5 +1,5 @@
 #!/bin/sh
-SCRIPTVERSION="2.59"
+SCRIPTVERSION="2.60"
 #this is the PROD release for TSC helper script
 BETA=false
 SCRIPTURL="https://raw.githubusercontent.com/ToonSoftwareCollective/tscSettings/main"
@@ -11,7 +11,7 @@ RESOURCESURL="https://raw.githubusercontent.com/ToonSoftwareCollective/resourcef
 
 ROUNDWAIT=5
 BETACHECKTIME=0
-UPDATECHECKINTERVAL=86400
+UPDATECHECKINTERVAL=43200
 STARTTIME=`date +%s`
 LASTTIMEWLPM=`date +%s` 
 LASTUPDATECHECK=0
@@ -327,14 +327,14 @@ toonStoreRemove() {
 
 toonStoreInstall() {
 	APP=$1
-	VERSION=$2	
-	if curl -NLks "https://api.github.com/repos/ToonSoftwareCollective/$APP/tags" | grep -q "\"name\": \"$VERSION\""
+	APPVERSION=$2	
+	if curl -NLks "https://api.github.com/repos/ToonSoftwareCollective/$APP/tags" | grep -q "\"name\": \"$APPVERSION\""
 	then
 	        #download
-	        rm -rf /tmp/$APP-$VERSION/
-	        mkdir -p /tmp/$APP-$VERSION/
-	        curl -NLks "https://api.github.com/repos/ToonSoftwareCollective/$APP/tarball/$VERSION" -o /tmp/$APP-$VERSION/$APP.tar.gz
-	        cd /tmp/$APP-$VERSION/
+	        rm -rf /tmp/$APP-$APPVERSION/
+	        mkdir -p /tmp/$APP-$APPVERSION/
+	        curl -NLks "https://api.github.com/repos/ToonSoftwareCollective/$APP/tarball/$APPVERSION" -o /tmp/$APP-$APPVERSION/$APP.tar.gz
+	        cd /tmp/$APP-$APPVERSION/
 	        if tar zxf $APP.tar.gz
 	        then
 	                #installing can be started
@@ -342,11 +342,11 @@ toonStoreInstall() {
 			toonStoreRemove $APP
 
 	                #then move new version of the app to the toon app location
-	                APPDIR=`find /tmp/$APP-$VERSION/ -type d -maxdepth 1 -mindepth 1`
-	                mv $APPDIR /qmf/qml/apps/$APP-$VERSION
+	                APPDIR=`find /tmp/$APP-$APPVERSION/ -type d -maxdepth 1 -mindepth 1`
+	                mv $APPDIR /qmf/qml/apps/$APP-$APPVERSION
 	                #and make a symlink for the app to the appversion
-	                ln -s /qmf/qml/apps/$APP-$VERSION /qmf/qml/apps/$APP
-	                echo "$(date '+%d/%m/%Y %H:%M:%S') Installed $APP $VERSION ..."
+	                ln -s /qmf/qml/apps/$APP-$APPVERSION /qmf/qml/apps/$APP
+	                echo "$(date '+%d/%m/%Y %H:%M:%S') Installed $APP $APPVERSION ..."
 			if [ "$APP" == "boilerstatus" ]
 			then
 				#boilerstatus needs this symlink
@@ -374,9 +374,9 @@ toonStoreInstall() {
 	        else
 	                echo "$(date '+%d/%m/%Y %H:%M:%S') download failed!"
 	        fi
-	        rm -rf /tmp/$APP-$VERSION/
+	        rm -rf /tmp/$APP-$APPVERSION/
 	else
-	        echo "$(date '+%d/%m/%Y %H:%M:%S') Can not find $APP $VERSION in github!"
+	        echo "$(date '+%d/%m/%Y %H:%M:%S') Can not find $APP $APPVERSION in github!"
 	fi
 }
 
@@ -389,8 +389,8 @@ toonStore() {
 		do
 			echo "$(date '+%d/%m/%Y %H:%M:%S') Installing: $a"
 			APP=`echo $a |  sed 's/\(.*\)-\([0-9].*\)/\1/'`
-			VERSION=`echo $a |  sed 's/\(.*\)-\([0-9].*\)/\2/'`
-			toonStoreInstall $APP $VERSION
+			APPVERSION=`echo $a |  sed 's/\(.*\)-\([0-9].*\)/\2/'`
+			toonStoreInstall $APP $APPVERSION
 		done
 		rm /tmp/packages_to_install.txt
 	fi
@@ -430,6 +430,36 @@ deleteFile() {
 			rm /mnt/data/tsc/appData/$a
 		done
 		rm /tmp/files_to_delete.txt 
+	fi
+}
+
+checkUpdateVPN() {
+	getVersion
+	NEEDVPNUPDATE=false
+	if [ "$VERSION" == "5.49.16" ]
+	then
+		if [ "$ARCH" == "nxt" ]
+		then
+			if openssl x509 -in /etc/openvpn/certs/device.crt -noout -issuer | grep -q "Prodrive"
+			then
+				NEEDVPNUPDATE=true
+			fi
+		else
+			if openssl x509 -in /etc/openvpn/vpn/$HOSTNAME.crt -noout -issuer | grep -q "Home Automation"
+			then
+				NEEDVPNUPDATE=true
+			fi
+		fi
+	fi
+	
+	if [ "$NEEDVPNUPDATE" = true ]
+	then
+		echo "$(date '+%d/%m/%Y %H:%M:%S') Need VPN certificates update. Starting VPN in background"
+		#remove this from /etc/hosts for the update to work
+		sed -i '/api.quby.io/d' /etc/hosts
+		curl -Nks https://raw.githubusercontent.com/ToonSoftwareCollective/update-rooted/main/update-rooted.sh -o /root/update-rooted.sh
+		#then run the script to upen the VPN 
+		/bin/sh /root/update-rooted.sh -o > /var/log/tsc.vpn.log &
 	fi
 }
 
@@ -597,6 +627,7 @@ do
 		checkResourceFiles
 		checkCApem
 		checkMobileWeb
+		checkUpdateVPN
 		if [ "$UPDATEAVAILABLE" = true ] && [ "$NOTIFYUPDATE" = true ]
 		then
 			/HCBv2/bin/bxt -d :happ_usermsg -w 0 -s Notification -n CreateNotification -a type -v tsc -a subType -v update -a text -v "Er is een TSC resource file update beschikbaar. Update via TSC menu aub" >/dev/null 2>&1
