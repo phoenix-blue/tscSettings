@@ -13,6 +13,7 @@ App {
 	property url rotateTilesScreenUrl: "RotateTilesScreen.qml"
 	property url toggleNativeFeaturesScreenUrl: "ToggleNativeFeaturesScreen.qml"
 	property url firmwareUpdateScreenUrl: "FirmwareUpdate.qml"
+property url changeMaxHeatingScreenUrl: "ChangeMaxHeatingScreen.qml"
 	property url credentialsMobileAppScreenUrl: "CredentialsMobileAppScreen.qml"
 	property url changeTariffScreenUrl: "ChangeTariffScreen.qml"
         property url softwareUpdateInProgressPopupUrl: "SoftwareUpdateInProgressPopup.qml"
@@ -22,7 +23,7 @@ App {
 	property url customToonLogoScreenUrl: "CustomToonLogoScreen.qml"
         property url settingsScreenUrl: "qrc:/apps/settings/SettingsScreen.qml"
 
-	property string tscVersion: "2.1.6"
+	property string tscVersion: "2.1.7"
 
 	property real nxtScale: isNxt ? 1.5 : 1 
 	property bool rebootNeeded: false
@@ -58,6 +59,7 @@ App {
 		registry.registerWidget("screen", customToonLogoScreenUrl, this, null, {lazyLoadScreen: true});
 		registry.registerWidget("screen", credentialsMobileAppScreenUrl, this, null, {lazyLoadScreen: true});
 		registry.registerWidget("screen", changeTariffScreenUrl, this, null, {lazyLoadScreen: true});
+                registry.registerWidget("screen", changeMaxHeatingScreenUrl, this, null, {lazyLoadScreen: true});
 		registry.registerWidget("popup", softwareUpdateInProgressPopupUrl, this,"softwareUpdateInProgressPopup");
                 notifications.registerType("tsc", notifications.prio_HIGHEST, Qt.resolvedUrl("drawables/notification-update.svg"), settingsScreenUrl, {"categoryUrl": tscFrameUrl}, "Meerdere TSC notifications");
 		notifications.registerSubtype("tsc", "update", settingsScreenUrl, {"categoryUrl": tscFrameUrl});
@@ -195,6 +197,13 @@ App {
                 msg.addArgumentXmlText("<BaseField><Type>GAS</Type><SeparateBilling>false</SeparateBilling><TariffPeak>%1</TariffPeak></BaseField>".arg(gas));
                 bxtClient.sendMsg(msg);
 	}
+	
+	function setMaxHeat(maxHeat) {
+			globals.tsc["maxHeatingTemp"] = parseFloat(maxHeat)
+			saveSettingsTsc();
+			Qt.quit()
+	}
+	
 
         function onThermostatInfoChanged(node) {
                var tempNode = node.child;
