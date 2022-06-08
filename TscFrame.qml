@@ -270,6 +270,7 @@ Widget {
 			}
 		}
 
+
 		StandardButton {
 			id: toggleNativeFeaturesButton
 			text: "Toon subscription features"
@@ -311,11 +312,34 @@ Widget {
 			}
 		}
 
+
+		StandardButton {
+			id: changeMaxHeat
+
+			text: qsTr("Change max. Heat")
+
+			height: 40 
+
+			visible: !app.localSettings.locked
+
+			anchors {
+				left: parent.left
+				top: guiModButton.bottom
+				topMargin: Math.round(15 * app.nxtScale)
+			}
+
+			topClickMargin: 2
+			onClicked: {
+				stage.openFullscreen(app.changeMaxHeatingScreenUrl);
+			}
+		}
+
+
        		Text {
        		        id: dhwPreheatToggleText
        		        anchors {
        		                left: parent.left
-       		                top: guiModButton.bottom
+       		                top: changeMaxHeat.bottom
 				topMargin: Math.round(15 * app.nxtScale)
        		        }
 			visible: !app.localSettings.locked && globals.thermostatFeatures["FF_Dhw_PreHeat_Settings"]
