@@ -1,0 +1,20 @@
+name: Calculate MD5 sum for file
+on: [push]
+jobs:
+  calculate-md5:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Calculate MD5 sum
+        run: |
+          md5sum tsc > tsc.md5
+        working-directory: path/to/file
+      - name: Commit MD5 sum file
+        run: |
+          git config --global user.email "igor@ergens.org"
+          git config --global user.name "Igor Ybema"
+          git add tsc.md5
+          git commit -m "Add MD5 sum for tsc"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
