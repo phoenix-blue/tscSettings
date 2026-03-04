@@ -2,7 +2,7 @@
 SCRIPTVERSION="2.61"
 #this is the PROD release for TSC helper script
 BETA=false
-SCRIPTURL="https://raw.githubusercontent.com/phoenix-blue/tscSettings/mqtt-settings-in-tsc"
+SCRIPTURL="https://raw.githubusercontent.com/phoenix-blue/tscSettings/refs/heads/mqtt-settings-in-tsc"
 RESOURCESURL="https://raw.githubusercontent.com/ToonSoftwareCollective/resourcefiles/main"
 
 
@@ -302,7 +302,7 @@ toggleBeta() {
 		echo "$(date '+%d/%m/%Y %H:%M:%S') Switching to production releases"
 		/HCBv2/bin/bxt -d :happ_usermsg -s Notification -n CreateNotification -a type -v tsc -a subType -v firewall -a text -v "TSC Productie releases geselecteerd" >/dev/null 2>&1
 		#only need to change script url to production as self update will then fetch the production script and reload
-		SCRIPTURL="https://raw.githubusercontent.com/phoenix-blue/tscSettings/mqtt-settings-in-tsc"
+		SCRIPTURL="https://raw.githubusercontent.com/phoenix-blue/tscSettings/refs/heads/mqtt-settings-in-tsc"
 		checkSelfUpdate
 	else
 		echo "$(date '+%d/%m/%Y %H:%M:%S') Switching to beta releases"
@@ -495,7 +495,7 @@ downloadNxtRecovery() {
 	if [ ! -f /mnt/recovery/recovery.sh ] 
 	then
 		echo "$(date '+%d/%m/%Y %H:%M:%S') Toon2 recovery script missing. Downloading it and saving it in the recovery location."
-		/usr/bin/curl -Nks  --retry 5 --connect-timeout 2 https://raw.githubusercontent.com/phoenix-blue/tscSettings/mqtt-settings-in-tsc/tsc-recovery-toon2.sh > /mnt/recovery/recovery.sh
+		/usr/bin/curl -Nks  --retry 5 --connect-timeout 2 https://raw.githubusercontent.com/phoenix-blue/tscSettings/refs/heads/mqtt-settings-in-tsc/tsc-recovery-toon2.sh > /mnt/recovery/recovery.sh
 		chmod +x /mnt/recovery/recovery.sh
 	fi	
 	umount /mnt/recovery
@@ -687,7 +687,7 @@ do
 			updateResourceFiles
 
 			#then get the production script (this will also restart this script)
-			SCRIPTURL="https://raw.githubusercontent.com/phoenix-blue/tscSettings/mqtt-settings-in-tsc"
+			SCRIPTURL="https://raw.githubusercontent.com/phoenix-blue/tscSettings/refs/heads/mqtt-settings-in-tsc"
 			checkSelfUpdate
 		fi
 
