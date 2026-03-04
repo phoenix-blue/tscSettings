@@ -334,6 +334,27 @@ Widget {
 			}
 		}
 
+		StandardButton {
+			id: mqttSettingsButton
+
+			text: qsTr("MQTT settings")
+
+			height: 40
+
+			visible: !app.localSettings.locked
+
+			anchors {
+				left: changeMaxHeat.right
+				top: changeMaxHeat.top
+				leftMargin: isNxt ? 20 : 15
+			}
+
+			topClickMargin: 2
+			onClicked: {
+				stage.openFullscreen(app.mqttSettingsScreenUrl);
+			}
+		}
+
 
        		Text {
        		        id: dhwPreheatToggleText

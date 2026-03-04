@@ -16,6 +16,7 @@ App {
 property url changeMaxHeatingScreenUrl: "ChangeMaxHeatingScreen.qml"
 	property url credentialsMobileAppScreenUrl: "CredentialsMobileAppScreen.qml"
 	property url changeTariffScreenUrl: "ChangeTariffScreen.qml"
+	property url mqttSettingsScreenUrl: "MqttSettingsScreen.qml"
         property url softwareUpdateInProgressPopupUrl: "SoftwareUpdateInProgressPopup.qml"
         property Popup softwareUpdateInProgressPopup
 	property url hideToonLogoScreenUrl: "HideToonLogoScreen.qml"
@@ -59,6 +60,7 @@ property url changeMaxHeatingScreenUrl: "ChangeMaxHeatingScreen.qml"
 		registry.registerWidget("screen", customToonLogoScreenUrl, this, null, {lazyLoadScreen: true});
 		registry.registerWidget("screen", credentialsMobileAppScreenUrl, this, null, {lazyLoadScreen: true});
 		registry.registerWidget("screen", changeTariffScreenUrl, this, null, {lazyLoadScreen: true});
+                registry.registerWidget("screen", mqttSettingsScreenUrl, this, null, {lazyLoadScreen: true});
                 registry.registerWidget("screen", changeMaxHeatingScreenUrl, this, null, {lazyLoadScreen: true});
 		registry.registerWidget("popup", softwareUpdateInProgressPopupUrl, this,"softwareUpdateInProgressPopup");
                 notifications.registerType("tsc", notifications.prio_HIGHEST, Qt.resolvedUrl("drawables/notification-update.svg"), settingsScreenUrl, {"categoryUrl": tscFrameUrl}, "Meerdere TSC notifications");

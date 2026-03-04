@@ -278,6 +278,14 @@ restoreRootPassword() {
 	/HCBv2/bin/bxt -d :happ_usermsg -s Notification -n CreateNotification -a type -v tsc -a subType -v password -a text -v "Root password restored to 'toon'" >/dev/null 2>&1
 }
 
+mqttRestart() {
+	echo "$(date '+%d/%m/%Y %H:%M:%S') Restarting MQTT services"
+	if [ -x /qmf/bin/start_mqtt_services.sh ]
+	then
+		/qmf/bin/start_mqtt_services.sh restart >/tmp/mqtt_restart.log 2>&1
+	fi
+}
+
 toonUpdate() {
 	echo "$(date '+%d/%m/%Y %H:%M:%S') Updating to latest Toon firmware"
 	#first always get latest update script in unattended mode
@@ -703,6 +711,9 @@ do
 						;;
 					restorerootpassword)
 						restoreRootPassword
+						;;
+					mqttrestart)
+						mqttRestart
 						;;
 					tscupdate)
 						LASTUPDATECHECK=$STARTROUNDTIME
